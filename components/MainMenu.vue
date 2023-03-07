@@ -2,7 +2,7 @@
   <v-app-bar app fixed dark elevation="4">
     <v-btn icon @click="$router.push('/')"><v-icon>mdi-home</v-icon></v-btn>
     <v-btn text @click="$router.push('/customers')">Clientes</v-btn>
-    <v-btn text>Facturas</v-btn>
+    <v-btn text @click="$router.push('/invoices')">Facturas</v-btn>
     <v-spacer />
     <v-btn text disabled>{{ user.name }}</v-btn>
 

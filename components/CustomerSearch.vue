@@ -1,5 +1,10 @@
 <template>
   <v-navigation-drawer>
+    <v-card color="primary">
+      <v-card-title>
+        Customer Search
+      </v-card-title>
+    </v-card>
     <v-form style="padding:5px">
       <v-text-field
         variant="underlined"

@@ -206,8 +206,8 @@ methods: {
     // Iniciamos la instancia de usuario
     const auth = useAuthStore()
     const options = {
-      method: 'PUT',
-      baseUrl:  auth.$state.baseUrl,
+      method: "put",
+      baseURL:  auth.$state.baseUrl,
       headers: {
         Authorization: `Bearer ${auth.$state.access_token}`
       },
@@ -215,6 +215,8 @@ methods: {
     }
     const endpoint = `/api/customer/${this.customer.CustomerId}`
     try {
+      console.log(endpoint)
+      console.log(options)
       let response = await $fetch(endpoint, options)
       console.log(response)
     } catch (error) {
