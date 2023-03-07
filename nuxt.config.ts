@@ -8,7 +8,7 @@ export default defineNuxtConfig({
   alias: {
     assets: "/<rootDir>/assets",
   },
-  css: ["vuetify/styles", "@mdi/font/css/materialdesignicons.min.css"],
+  css: ["vuetify/styles/main.sass", "@mdi/font/css/materialdesignicons.min.css"],
   build: {
     transpile: ["vuetify"],
   },

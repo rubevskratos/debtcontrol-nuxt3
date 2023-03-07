@@ -22,7 +22,7 @@ export const useCustomerStore = defineStore("customer", {
           }
         })
         if (customer) {
-          this.updateCustomer(customer)
+          this.updateCustomerStore(customer)
         }
       } catch (error) {
         console.log(error);
@@ -39,16 +39,16 @@ export const useCustomerStore = defineStore("customer", {
           }
         })
         if (salesrep) {
-          this.updateSalesRep(salesrep)
+          this.updateSalesRepStore(salesrep)
         }
       } catch (error) {
         console.log(error)
       }
     },
-    updateCustomer(customer: object) {
+    updateCustomerStore(customer: object) {
       this.customer = customer;
     },
-    updateSalesRep(salesrep:object) {
+    updateSalesRepStore(salesrep:object) {
       this.salesRep = salesrep
     }
   },

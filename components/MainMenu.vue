@@ -9,7 +9,7 @@
     <!-- <v-btn icon v-if="this.$auth.user.Admin" @click="$router.push('/admin')"
       ><v-icon>mdi-cog</v-icon></v-btn
     > -->
-    <v-btn color="primary" @click="logout">Logout</v-btn>
+    <v-btn rounded icon="mdi-logout" variant="tonal" @click="logout" />
   </v-app-bar>
 </template>
 

@@ -1,10 +1,8 @@
 <template>
-  <v-row>
-    <CustomerSearch @show-results="setCustomers" />
-  </v-row>
-  <v-container style="margin-top: 25px">
-    <v-row justify="center" align="center">
-      <v-col cols="12" sm="8" md="8 ">
+  <v-container fluid style="margin-top: 5%">
+    <v-row justify="end" align="center">
+      <CustomerSearch @show-results="setCustomers" />
+      <v-col cols="6" sm="8" md="8" >
         <v-pagination
           :length="pagination.length"
           v-model="pagination.page"
@@ -23,11 +21,11 @@
 </template>
 
 <script>
-import { useCustomerStore } from '@/store/customers'
+import { useCustomerStore } from "@/store/customers";
 
 definePageMeta({
   middleware: ["auth"],
-})
+});
 
 export default {
   data() {
@@ -74,13 +72,13 @@ export default {
       this.showResults();
     },
     async getCustomer(customer) {
-      let id = toRaw(customer)
-      const customerStore = useCustomerStore()
+      let id = toRaw(customer);
+      const customerStore = useCustomerStore();
       try {
-        let response = await customerStore.fetchCustomer(id.CustomerId)
-        this.$router.push({name: 'customers-customer'})
+        let response = await customerStore.fetchCustomer(id.CustomerId);
+        this.$router.push({ name: "customers-customer" });
       } catch (error) {
-        console.log(error)
+        console.log(error);
       }
     },
   },

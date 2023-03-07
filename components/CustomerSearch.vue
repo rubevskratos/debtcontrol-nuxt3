@@ -1,6 +1,6 @@
 <template>
   <v-navigation-drawer>
-    <v-form>
+    <v-form style="padding:5px">
       <v-text-field
         variant="underlined"
         name="SearchName"
