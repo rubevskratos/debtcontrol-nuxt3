@@ -6,9 +6,9 @@
     <v-spacer />
     <v-btn text disabled>{{ user.name }}</v-btn>
 
-    <!-- <v-btn icon v-if="this.$auth.user.Admin" @click="$router.push('/admin')"
+    <v-btn icon v-if="user.Admin" @click="$router.push('/admin')"
       ><v-icon>mdi-cog</v-icon></v-btn
-    > -->
+    >
     <v-btn rounded icon="mdi-logout" variant="tonal" @click="logout" />
   </v-app-bar>
 </template>
@@ -20,7 +20,7 @@ import { useAuthStore } from '@/store/auth'
 export default {
   data() {
     return {
-      user: "", 
+      user: useAuthStore().$state.user, 
     };
   },
   methods: {
