@@ -7,8 +7,10 @@
       <v-card>
         <v-card-text>
           Ordenar
-          <v-radio label="Ascendente" value="asc"></v-radio>
-          <v-radio label="Descendente" value="desc"></v-radio>
+          <v-radio-group>
+            <v-radio label="Ascendente" value="asc" @click="$emit('order-by-invoice', {order:'asc'})"></v-radio>
+            <v-radio label="Descendente" value="desc" @click="$emit('order-by-invoice', {order:'desc'})"></v-radio>
+          </v-radio-group>
           <v-divider />
           Ordenar por
           <v-select
@@ -16,21 +18,25 @@
             :items="fields"
             v-model="sortByField"
             label="Campo..."
-          ></v-select>
-          <v-select
-            density="compact"
-            :items="actions"
-            v-model="sortByAction"
-            label="Tipo de acción..."
+            @update:model-value="sortByFieldEvent"
           ></v-select>
           <v-divider />
           Filtros:
           <v-switch
-            v-model="Active"
-            hide-
-            inset
-            :label="`Active: ${Active.toString()}`"
+          v-model="Active"
+          hide
+          inset
+          :label="`Active: ${Active.toString()}`"
           ></v-switch>
+          <v-select
+            clearable
+            density="compact"
+            :items="actions"
+            item-title="IncidenceName"
+            item-value="IncidenceId"
+            v-model="sortByAction"
+            label="Tipo de acción..."
+          ></v-select>
           <v-text-field
             density="compact"
             name="dateMin"
@@ -87,45 +93,19 @@ export default {
         CustomerName: "",
         InvoiceNumber: "",
       },
-      fields: [],
       actions: [],
       sortByField: "",
       sortByAction: "",
       CustomerCode: "",
       limit: 0,
       Active: false,
+      fields: []
     };
   },
-  // mounted: async function () {
-  //   const auth = useAuthStore();
-  //   const options = {
-  //     method: "GET",
-  //     baseURL: auth.$state.baseUrl,
-  //     headers: {
-  //       Authorization: `Bearer ${auth.$state.access_token}`,
-  //     },
-  //   };
-  //   try {
-  //     let Reps = await $fetch("/api/salesrep", options);
-  //     Reps.filter((rep) => rep.Status).forEach((rep, i) => {
-  //       this.RepNames[i] = rep.SalesRepName;
-  //     });
-  //     let Agents = await $fetch("/api/employee", options);
-  //     Agents.filter((agent) => agent.Status).forEach((agent, i) => {
-  //       this.EmployeeNames[i] = agent.EmployeeName;
-  //     });
-  //     let CustomerGroups = await $fetch("/api/cusgroup", options);
-  //     CustomerGroups.forEach((group, i) => {
-  //       this.CustomerGroupCodes[i] = {
-  //         CusGroupCode: group.CusGroupCode,
-  //         GroupLabel: group.GroupLabel,
-  //       };
-  //     });
-  //   } catch (error) {
-  //     console.log("Error after mount:" + error);
-  //   }
-  // },
   methods: {
+    updateFields(fields) {
+      this.fields = fields
+    },
     createParams(parent) {
       const child = {};
       for (const key in parent) {
@@ -134,6 +114,9 @@ export default {
         }
       }
       return child;
+    },
+    sortByFieldEvent() {
+      this.$emit('sort-by-field', this.sortByField)
     },
     async getInvoices() {
       const auth = useAuthStore();
@@ -151,6 +134,8 @@ export default {
         }
         if (this.Active) {
             this.params.Active = true
+        } else {
+            delete this.params['Active']
         }
 
         const params = this.createParams(this.params);
@@ -164,5 +149,31 @@ export default {
       }
     },
   },
+  async mounted() {
+       const auth = useAuthStore()
+       const options = {
+         method: "GET",
+         baseURL: auth.$state.baseUrl,
+         headers: {
+           Authorization: `Bearer ${auth.$state.access_token}`
+         }
+       }
+       const fields = []
+       try {
+         let invoice = await $fetch("/api/invoice/1", options)
+         let incidenceCauses = await $fetch("/api/incidence_cause", options)
+         for (const key in invoice) {
+           if (Object.hasOwnProperty.call(invoice, key)) {
+             const element = invoice[key];
+             if (key != 'Active') { 
+               this.fields.push(key)            
+             }
+           }
+         }
+         incidenceCauses.forEach(incidence => this.actions.push(incidence))
+       } catch (error) {
+         console.log(error)
+       }
+  }
 };
 </script>

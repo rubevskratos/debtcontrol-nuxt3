@@ -2,7 +2,23 @@
     <v-container>
       <v-card elevation="10" shaped>
         <v-card-title primary-title>
-          {{ invoice.InvoiceNumber }}
+          {{ invoice.InvoiceNumber }} -
+          <v-chip v-if="invoice.Active"
+            class="ma-2"
+            color="error"
+            text-color="white"
+            prepend-icon="mdi-close-circle"
+          >
+          Active
+          </v-chip>
+          <v-chip v-else
+            class="ma-2"
+            color="teal"
+            text-color="white"
+            prepend-icon="mdi-check-circle"
+          >
+          Closed
+          </v-chip>
         </v-card-title>
         <v-card-subtitle>
             {{ invoice.customer.CustomerCode }} - {{ invoice.customer.CustomerName }}

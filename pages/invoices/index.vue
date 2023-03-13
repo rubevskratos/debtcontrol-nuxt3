@@ -1,12 +1,12 @@
 <template>
     <v-container fluid style="margin-top: 5%">
       <v-row justify="end" align="center">
-        <InvoiceSearch @show-results="setInvoices" />
+        <InvoiceSearch @show-results="setInvoices" @order-by-invoice="orderByInvoice" @sort-by-field="orderByField" @sort-by-action="sortByAction"/>
         <v-col cols="6" sm="8" md="8" >
           <v-pagination
             :length="pagination.length"
             v-model="pagination.page"
-            @input="updatePagination"
+            @click="updatePagination"
           >
           </v-pagination>
           <InvoiceCard
@@ -30,6 +30,7 @@
   export default {
     data() {
       return {
+        currentOrder: 'desc',
         invoiceList: [],
         pageList: [],
         pagination: {
@@ -69,8 +70,10 @@
       updatePagination() {
         //Primero limpiamos el array de resultados.
         this.pageList.splice(0);
+        console.log(this.pageList)
         //Luego ejecutamos nuevamente la búsqueda.
         this.showResults();
+        console.log(this.pageList)
       },
       async getInvoice(invoice) {
         let id = toRaw(invoice);
@@ -82,6 +85,50 @@
           console.log(error);
         }
       },
+      orderByInvoice(order) {
+        this.currentOrder = order
+        if (order.order === 'asc') {
+          this.invoiceList.sort((a,b) => {
+            const invoiceA = a.InvoiceNumber
+            const invoiceB = b.InvoiceNumber
+            return invoiceA > invoiceB?1:-1
+          })
+          this.updatePagination()
+        } else if (order.order === 'desc') {
+          this.invoiceList.sort((a,b) => {
+            const invoiceA = a.InvoiceNumber
+            const invoiceB = b.InvoiceNumber
+            return invoiceA > invoiceB?1:-1
+          }).reverse()
+          this.updatePagination()
+        }
+      },
+      orderByField(field) {
+          const key = field
+          if (this.currentOrder === 'asc') {
+            this.invoiceList.sort((a,b) => {
+              const invoiceA = a[key]
+              const invoiceB = b[key]
+              if (invoiceA > invoiceB) return 1
+              if (invoiceA < invoiceB) return -1
+              return 0
+            })
+            this.updatePagination()
+          } else {
+            this.invoiceList.sort((a,b) => {
+              const invoiceA = a[key]
+              const invoiceB = b[key]
+              if (invoiceA < invoiceB) return 1
+              if (invoiceA > invoiceB) return -1
+              return 0
+            })
+            this.updatePagination()
+          }
+      },
+      orderByAction(action) {
+        
+        this.updatePagination()
+      }
     },
   };
   </script>

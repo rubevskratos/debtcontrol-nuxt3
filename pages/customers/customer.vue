@@ -134,11 +134,27 @@
                   <v-card>
                     <v-card-text>
                       <v-form>
-                        <v-text-field v-model="inputData.Department" label="Departamento" />
-                        <v-text-field v-model="inputData.ContactName" label="Persona de contacto" />
-                        <v-text-field v-model="inputData.Phone" label="Teléfono Particular" />
-                        <v-text-field v-model="inputData.ContactEmail" type="Email" label="Correo Electrónico" />
-                        <v-text-field v-model="inputData.AdministrativePhone" label="Teléfono Administración" />
+                        <v-text-field
+                          v-model="inputData.Department"
+                          label="Departamento"
+                        />
+                        <v-text-field
+                          v-model="inputData.ContactName"
+                          label="Persona de contacto"
+                        />
+                        <v-text-field
+                          v-model="inputData.Phone"
+                          label="Teléfono Particular"
+                        />
+                        <v-text-field
+                          v-model="inputData.ContactEmail"
+                          type="Email"
+                          label="Correo Electrónico"
+                        />
+                        <v-text-field
+                          v-model="inputData.AdministrativePhone"
+                          label="Teléfono Administración"
+                        />
                       </v-form>
                     </v-card-text>
                     <v-card-actions>
@@ -154,6 +170,20 @@
                 </v-dialog>
               </v-card-actions>
             </v-card>
+          </v-container>
+          <!-- Sección Histórico -->
+          <v-container v-if="picklist[2].active" fluid>
+            <v-pagination
+              :length="pagination.length"
+              v-model="pagination.page"
+              @click="updatePagination('history')"
+            >
+            </v-pagination>
+            <InvoiceCard
+              v-for="(invoice, i) in invoiceHistory"
+              :invoice="invoice"
+              :key="i"
+            />
           </v-container>
         </v-sheet>
       </v-col>
@@ -181,50 +211,106 @@ export default {
         { name: "Planes de Pago", active: false },
       ],
       customer: useCustomerStore().$state.customer,
+      invoiceHistory: [],
+      invoiceActions: [],
       inputData: {
-        Department: '',
-        EmailContact: '',
-        Phone: '',
-        ContactName: '',
-        AdministrativePhone: '',
-      }
-    }
-  },
-methods: {
-  updateSheet(i) {
-    this.picklist.forEach((e) => (e.active = false));
-    this.picklist[i].active = true;
-  },
-  async updateCustomer() {
-    // Nos quedamos únicamente con los parámetros que contengan datos
-    const body = {}
-    for (const key in this.inputData) {
-      if (this.inputData[key]) {
-        body[key] = this.inputData[key]
-      }
-    }
-    // Iniciamos la instancia de usuario
-    const auth = useAuthStore()
-    const options = {
-      method: "put",
-      baseURL:  auth.$state.baseUrl,
-      headers: {
-        Authorization: `Bearer ${auth.$state.access_token}`
+        Department: "",
+        EmailContact: "",
+        Phone: "",
+        ContactName: "",
+        AdministrativePhone: "",
       },
-      body: body
-    }
-    const endpoint = `/api/customer/${this.customer.CustomerId}`
-    try {
-      console.log(endpoint)
-      console.log(options)
-      let response = await $fetch(endpoint, options)
-      console.log(response)
-    } catch (error) {
-      console.log(error)
-    }
-  }
-},
-}
+      pageList: [],
+      pagination: {
+        length: 0,
+        page: 1,
+        limit: 10,
+      },
+    };
+  },
+  methods: {
+    updatePagination(type) {
+      if(type === 'history') {
+        this.invoiceHistory.splice(0);
+        this.getHistory()
+      }
+    },
+    updateSheet(i) {
+      this.picklist.forEach((e) => (e.active = false));
+      this.picklist[i].active = true;
+      if (this.picklist[2]) {
+        this.getHistory();
+      }
+    },
+    async updateCustomer() {
+      // Nos quedamos únicamente con los parámetros que contengan datos
+      const body = {};
+      for (const key in this.inputData) {
+        if (this.inputData[key]) {
+          body[key] = this.inputData[key];
+        }
+      }
+      // Iniciamos la instancia de usuario
+      const auth = useAuthStore();
+      const options = {
+        method: "put",
+        baseURL: auth.$state.baseUrl,
+        headers: {
+          Authorization: `Bearer ${auth.$state.access_token}`,
+        },
+        body: body,
+      };
+      const endpoint = `/api/customer/${this.customer.CustomerId}`;
+      try {
+        console.log(endpoint);
+        console.log(options);
+        let response = await $fetch(endpoint, options);
+        console.log(response);
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    async getHistory() {
+      const auth = useAuthStore();
+      const options = {
+        method: "get",
+        baseURL: auth.$state.baseUrl,
+        headers: {
+          Authorization: `Bearer ${auth.$state.access_token}`,
+        },
+      };
+      const params = {
+        CustomerName: this.customer.CustomerName,
+      };
+      options.params = params;
+
+      try {
+        let invoices = await $fetch("/api/invoice", options);
+        this.showResults(invoices, "history");
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    showResults(invoiceList, type) {
+      let totalLength = invoiceList.length;
+      this.pagination.length = Math.ceil(totalLength / this.pagination.limit);
+      let currentIndex = this.pagination.limit * (this.pagination.page - 1);
+      let currentLimit = currentIndex + this.pagination.limit;
+      let x = 0;
+
+      invoiceList.forEach((invoice, i) => {
+        if (i >= currentIndex && i < currentLimit) {
+          if (type === "history") {
+            this.invoiceHistory[x] = invoiceList[i];
+          } else if (type === "actions") {
+            this.invoiceActions[x] = invoiceList[i];
+          }
+          x++;
+        }
+      });
+    },
+  },
+};
 </script>
 
 <style lang="scss" scoped></style>
