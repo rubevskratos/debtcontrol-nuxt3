@@ -1,7 +1,7 @@
 <template>
   <v-app>
     <MainMenu v-if="isLoggedIn()"/>
-    <v-container fluid style="height:100%;margin:0%;padding:0%">
+    <v-container fluid class="fill-height mt-5">
       <NuxtPage />
     </v-container>
   </v-app>

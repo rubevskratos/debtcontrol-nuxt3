@@ -1,5 +1,5 @@
 <template>
-  <v-app-bar app fixed dark elevation="4">
+  <v-app-bar app>
     <v-btn icon @click="$router.push('/')"><v-icon>mdi-home</v-icon></v-btn>
     <v-btn text @click="$router.push('/customers')">Clientes</v-btn>
     <v-btn text @click="$router.push('/invoices')">Facturas</v-btn>

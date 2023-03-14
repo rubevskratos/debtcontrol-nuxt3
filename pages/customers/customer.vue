@@ -1,6 +1,5 @@
 <template>
-  <v-container class="ma-10" style="height: 100%">
-    <v-row justify="center" class="fill-height ma-15">
+    <v-row justify="center" align="top" class="fill-height pa-5 overflow-hidden">
       <v-col cols="12" xl="2" md="3" sm="3">
         <v-sheet rounded>
           <v-list rounded elevation="2">
@@ -23,9 +22,8 @@
           </v-list>
         </v-sheet>
       </v-col>
-
       <v-col>
-        <v-sheet min-height="70vh" rounded="lg">
+        <v-sheet rounded="lg" class="overflow-hidden">
           <!-- Sección Cuenta -->
           <v-container v-if="picklist[0].active" fluid>
             <v-card>
@@ -147,7 +145,7 @@
                           label="Teléfono Particular"
                         />
                         <v-text-field
-                          v-model="inputData.ContactEmail"
+                          v-model="inputData.EmailContact"
                           type="Email"
                           label="Correo Electrónico"
                         />
@@ -172,23 +170,35 @@
             </v-card>
           </v-container>
           <!-- Sección Histórico -->
-          <v-container v-if="picklist[2].active" fluid>
+          <v-container v-if="picklist[2].active" fluid class="overflow-auto" style="max-height: 90vh;">
             <v-pagination
               :length="pagination.length"
               v-model="pagination.page"
               @click="updatePagination('history')"
             >
             </v-pagination>
-            <InvoiceCard
-              v-for="(invoice, i) in invoiceHistory"
-              :invoice="invoice"
-              :key="i"
-            />
+                <InvoiceCard
+                  v-for="(invoice, i) in invoiceHistory"
+                  :invoice="invoice"
+                  :key="i"
+                />
+          </v-container>
+          <v-container v-if="picklist[3].active" fluid class="overflow-auto" style="max-height: 90vh;">
+            <v-pagination
+              :length="pagination.length"
+              v-model="pagination.page"
+              @click="updatePagination('actions')"
+            >
+            </v-pagination>
+                <InvoiceCard
+                  v-for="(invoice, i) in invoiceActions"
+                  :invoice="invoice"
+                  :key="i"
+                />
           </v-container>
         </v-sheet>
       </v-col>
     </v-row>
-  </v-container>
 </template>
 
 <script>
@@ -232,14 +242,21 @@ export default {
     updatePagination(type) {
       if(type === 'history') {
         this.invoiceHistory.splice(0);
-        this.getHistory()
+        this.getInvoices(type)
+      } else {
+        this.invoiceActions.splice(0);
+        this.getInvoices(type)
       }
     },
     updateSheet(i) {
       this.picklist.forEach((e) => (e.active = false));
       this.picklist[i].active = true;
-      if (this.picklist[2]) {
-        this.getHistory();
+      this.pagination.page = 1
+      this.pagination.length = 0
+      if (this.picklist[2].active) {
+        this.getInvoices('history');
+      } else if (this.picklist[3].active) {
+        this.getInvoices('actions')
       }
     },
     async updateCustomer() {
@@ -257,20 +274,18 @@ export default {
         baseURL: auth.$state.baseUrl,
         headers: {
           Authorization: `Bearer ${auth.$state.access_token}`,
-        },
-        body: body,
+        }
       };
+      options.body = body
       const endpoint = `/api/customer/${this.customer.CustomerId}`;
       try {
-        console.log(endpoint);
-        console.log(options);
         let response = await $fetch(endpoint, options);
-        console.log(response);
+        this.customer = response
       } catch (error) {
         console.log(error);
       }
     },
-    async getHistory() {
+    async getInvoices(type) {
       const auth = useAuthStore();
       const options = {
         method: "get",
@@ -280,13 +295,18 @@ export default {
         },
       };
       const params = {
+        Active: false,
         CustomerName: this.customer.CustomerName,
       };
       options.params = params;
+  
+      if (type === 'actions') {
+       options.params.Active = true
+      }
 
       try {
         let invoices = await $fetch("/api/invoice", options);
-        this.showResults(invoices, "history");
+        this.showResults(invoices, type);
       } catch (error) {
         console.log(error);
       }
