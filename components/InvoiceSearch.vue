@@ -87,11 +87,13 @@ import { useAuthStore } from "@/store/auth";
 export default {
   data() {
     return {
-      minDate: "",
-      maxDate: "",
+      minDate: this.initialDate(),
+      maxDate: this.today(),
       params: {
         CustomerName: "",
         InvoiceNumber: "",
+        FromInvoiceDate: "",
+        ToInvoiceDate: ""
       },
       actions: [],
       sortByField: "",
@@ -103,11 +105,36 @@ export default {
     };
   },
   methods: {
+    today() {
+      const date = new Date()
+      const dateText = date.toJSON()
+      const day = dateText.split('-')[2].split('T')[0]
+      const month = dateText.split('-')[1]
+      const year = dateText.split('-')[0]
+      const today = `${year}-${month}-${day}`
+      return today
+    },
+    initialDate() {
+      const date = new Date()
+      date.setMonth(date.getMonth()-3)
+      const dateText = date.toJSON()
+      const day = dateText.split('-')[2].split('T')[0]
+      const month = dateText.split('-')[1]
+      const year = dateText.split('-')[0]
+      const initialDate = `${year}-${month}-${day}`
+      return initialDate
+    },
     updateFields(fields) {
       this.fields = fields
     },
     createParams(parent) {
       const child = {};
+      if (this.minDate) {
+        parent.FromInvoiceDate = this.minDate
+      }
+      if (this.maxDate) {
+        parent.ToInvoiceDate = this.maxDate
+      }
       for (const key in parent) {
         if (parent[key]) {
           child[key] = parent[key];
@@ -140,7 +167,6 @@ export default {
 
         const params = this.createParams(this.params);
         options.params = params;
-
         let invoices = await $fetch("/api/invoice", options);
         
         this.$emit("show-results", invoices);

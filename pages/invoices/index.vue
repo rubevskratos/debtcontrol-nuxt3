@@ -73,7 +73,6 @@
         console.log(this.pageList)
         //Luego ejecutamos nuevamente la búsqueda.
         this.showResults();
-        console.log(this.pageList)
       },
       async getInvoice(invoice) {
         let id = toRaw(invoice);

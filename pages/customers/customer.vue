@@ -224,11 +224,11 @@ export default {
       invoiceHistory: [],
       invoiceActions: [],
       inputData: {
-        Department: "",
-        EmailContact: "",
-        Phone: "",
-        ContactName: "",
-        AdministrativePhone: "",
+        Department: useCustomerStore().$state.customer.Department,
+        EmailContact: useCustomerStore().$state.customer.EmailContact,
+        Phone: useCustomerStore().$state.customer.Phone,
+        ContactName: useCustomerStore().$state.customer.ContactName,
+        AdministrativePhone: useCustomerStore().$state.customer.AdministrativePhone,
       },
       pageList: [],
       pagination: {
@@ -281,6 +281,7 @@ export default {
       try {
         let response = await $fetch(endpoint, options);
         this.customer = response
+        this.dialog = false
       } catch (error) {
         console.log(error);
       }
