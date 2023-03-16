@@ -57,7 +57,7 @@
             name="customerCode"
             label="Código M3"
             id="customerCode"
-            v-model="CustomerCode"
+            v-model="params.CustomerCode"
           />
           <v-text-field
             density="compact"
@@ -90,6 +90,7 @@ export default {
       minDate: this.initialDate(),
       maxDate: this.today(),
       params: {
+        CustomerCode: "",
         CustomerName: "",
         InvoiceNumber: "",
         FromInvoiceDate: "",
@@ -98,7 +99,6 @@ export default {
       actions: [],
       sortByField: "",
       sortByAction: "",
-      CustomerCode: "",
       limit: 0,
       Active: false,
       fields: []

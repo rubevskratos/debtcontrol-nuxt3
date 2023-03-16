@@ -1,7 +1,7 @@
 <template>
     <v-container fluid style="margin-top: 5%">
       <v-row justify="end" align="center">
-        <InvoiceSearch @show-results="setInvoices" @order-by-invoice="orderByInvoice" @sort-by-field="orderByField" @sort-by-action="sortByAction"/>
+        <InvoiceSearch @show-results="setInvoices" @order-by-invoice="orderByInvoice" @sort-by-field="orderByField" @sort-by-action="orderByAction"/>
         <v-col cols="6" sm="8" md="8" >
           <v-pagination
             :length="pagination.length"
@@ -70,7 +70,6 @@
       updatePagination() {
         //Primero limpiamos el array de resultados.
         this.pageList.splice(0);
-        console.log(this.pageList)
         //Luego ejecutamos nuevamente la búsqueda.
         this.showResults();
       },
@@ -125,8 +124,7 @@
           }
       },
       orderByAction(action) {
-        
-        this.updatePagination()
+        //Pendiente desarrollar
       }
     },
   };
