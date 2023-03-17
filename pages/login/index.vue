@@ -1,8 +1,8 @@
 <template>
-  <v-container fluid style="height:100%;margin:0%;padding:0%">
-    <v-row style="height:100%;margin:0%;padding:0%" align="center" justify="center">
-      <v-col cols="12" md="6" style="height:100%;margin:0;padding:0">
-        <v-img src="/img/galderma_login.jpeg" style="height: 100%" cover></v-img>
+  <v-container fluid class="fill-height ma-0 pa-0">
+    <v-row class="fill-height ma-0 pa-0" justify="center">
+      <v-col cols="12" md="6">
+        <v-img src="/img/galderma_login.jpeg" class="fill-height ma-0 pa-0" cover></v-img>
       </v-col>
         <v-col cols="12" md="6">
           <v-card flat style="margin: 20%">
@@ -29,6 +29,7 @@
                   hint="At least 8 characters"
                   min="8"
                   v-model="login.Password"
+                  v-on:keyup.enter="userLogin"
                   type="password"
                 ></v-text-field>
               </v-form>

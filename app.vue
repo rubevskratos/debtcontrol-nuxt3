@@ -1,8 +1,11 @@
 <template>
   <v-app>
     <MainMenu v-if="isLoggedIn()"/>
-    <v-container fluid class="fill-height mt-5">
+    <v-container v-if="!isLoggedIn()" fluid class="fill-height ma-0 pa-0">
       <NuxtPage />
+    </v-container>
+    <v-container v-else fluid class="fill-height overflow-hidden">
+      <NuxtPage class="mt-8"/>
     </v-container>
   </v-app>
 </template>

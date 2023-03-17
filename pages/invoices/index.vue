@@ -47,7 +47,7 @@
         this.pageList.splice(0);
         invoices.forEach((invoice, i) => {
           this.invoiceList[i] = invoice;
-          this.invoiceList[i].Balance = Math.round(this.invoiceList[i].Balance)
+          this.invoiceList[i].Balance = Math.round(((this.invoiceList[i].Balance + Number.EPSILON) * 100))/100
         });
         this.showResults();
       },

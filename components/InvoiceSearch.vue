@@ -162,7 +162,7 @@ export default {
         if (this.Active) {
             this.params.Active = true
         } else {
-            delete this.params['Active']
+            this.params.Active = false
         }
 
         const params = this.createParams(this.params);

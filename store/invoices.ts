@@ -6,7 +6,9 @@ export const useInvoiceStore = defineStore("invoice", {
     invoice: {}
   }),
   getters: {
-    getInvoice: (state) => state.invoice
+    getInvoice: (state) => {
+      state.invoice
+    }
   },
   actions: {
     async fetchInvoice(invoiceId:string) {
