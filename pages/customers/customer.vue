@@ -286,6 +286,25 @@ export default {
         console.log(error);
       }
     },
+    today() {
+      const date = new Date()
+      const dateText = date.toJSON()
+      const day = dateText.split('-')[2].split('T')[0]
+      const month = dateText.split('-')[1]
+      const year = dateText.split('-')[0]
+      const today = `${year}-${month}-${day}`
+      return today
+    },
+    initialDate() {
+      const date = new Date()
+      date.setYear(1900 + (date.getYear()-5))
+      const dateText = date.toJSON()
+      const day = dateText.split('-')[2].split('T')[0]
+      const month = dateText.split('-')[1]
+      const year = dateText.split('-')[0]
+      const initialDate = `${year}-${month}-${day}`
+      return initialDate
+    },
     async getInvoices(type) {
       const auth = useAuthStore();
       const options = {
@@ -295,23 +314,28 @@ export default {
           Authorization: `Bearer ${auth.$state.access_token}`,
         },
       };
+      
       const params = {
         Active: false,
-        CustomerName: this.customer.CustomerName,
+        CustomerCode: this.customer.CustomerCode,
+        FromInvoiceDate: this.initialDate(),
+        ToInvoiceDate: this.today()
       };
+
       options.params = params;
   
       if (type === 'actions') {
        options.params.Active = true
       }
-
       try {
+        console.log(options)
         let invoices = await $fetch("/api/invoice", options);
         this.showResults(invoices, type);
       } catch (error) {
         console.log(error);
       }
     },
+
     showResults(invoiceList, type) {
       let totalLength = invoiceList.length;
       this.pagination.length = Math.ceil(totalLength / this.pagination.limit);
