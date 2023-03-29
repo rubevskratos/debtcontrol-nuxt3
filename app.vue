@@ -4,7 +4,7 @@
     <v-container v-if="!isLoggedIn()" fluid class="fill-height ma-0 pa-0">
       <NuxtPage />
     </v-container>
-    <v-container v-else fluid class="fill-height overflow-hidden">
+    <v-container v-else fluid class="overflow-hidden">
       <NuxtPage class="mt-8"/>
     </v-container>
   </v-app>

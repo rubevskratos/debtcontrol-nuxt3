@@ -1,5 +1,5 @@
 <template>
-    <v-row justify="center" align="top" class="fill-height pa-5 overflow-hidden">
+    <v-row justify="center" class="fill-height pa-5 overflow-hidden">
       <v-col cols="12" xl="2" md="3" sm="3">
         <v-sheet rounded>
           <v-list rounded elevation="2">
@@ -54,10 +54,10 @@
                       Gestor de cobro:
                       {{ customer.empcollection_manager?.EmployeeName }}
                     </v-col>
-                    <v-col> Reparto de deuda: </v-col>
+                    <v-col>Reparto de deuda: {{ customer.DebtDistribution }} </v-col>
                   </v-row>
                   <v-row cols="12" md="12">
-                    <v-col> Notas de cliente: </v-col>
+                    <v-col> Notas de cliente: {{ customer.ClientNotes }}</v-col>
                   </v-row>
                 </v-container>
               </v-card-text>
@@ -71,13 +71,13 @@
                   <v-card>
                     <v-card-text>
                       <v-form>
-                        <v-select label="Reparto de deuda"> </v-select>
-                        <v-textarea label="Notas del cliente"> </v-textarea>
+                        <v-select v-model="inputData.DebtDistribution" label="Reparto de deuda"> </v-select>
+                        <v-textarea v-model="inputData.ClientNotes" label="Notas del cliente"> </v-textarea>
                       </v-form>
                     </v-card-text>
                     <v-card-actions>
                       <v-spacer />
-                      <v-btn color="primary" @click="dialog = false"
+                      <v-btn color="primary" @click="updateCustomer()"
                         >Aceptar</v-btn
                       >
                       <v-btn color="error" @click="dialog = false"
@@ -224,6 +224,8 @@ export default {
       invoiceHistory: [],
       invoiceActions: [],
       inputData: {
+        DebtDistribution: useCustomerStore().$state.customer.DebtDistribution,
+        ClientNotes: useCustomerStore().$state.customer.ClientNotes,
         Department: useCustomerStore().$state.customer.Department,
         EmailContact: useCustomerStore().$state.customer.EmailContact,
         Phone: useCustomerStore().$state.customer.Phone,
@@ -269,6 +271,7 @@ export default {
       }
       // Iniciamos la instancia de usuario
       const auth = useAuthStore();
+      const customer = useCustomerStore();
       const options = {
         method: "put",
         baseURL: auth.$state.baseUrl,
@@ -281,6 +284,7 @@ export default {
       try {
         let response = await $fetch(endpoint, options);
         this.customer = response
+        customer.fetchCustomer(response.CustomerId)
         this.dialog = false
       } catch (error) {
         console.log(error);
@@ -328,7 +332,6 @@ export default {
        options.params.Active = true
       }
       try {
-        console.log(options)
         let invoices = await $fetch("/api/invoice", options);
         this.showResults(invoices, type);
       } catch (error) {
