@@ -2,36 +2,90 @@
   <v-row justify="center" align="start">
     <v-col cols="12" md="12">
       <v-card class="mt-5">
-        <v-card-title>
-          Detalles de factura:
-        </v-card-title>
+        <v-card-actions>
+          <h3 class="pa-1">Detalles de factura:</h3>
+          <v-spacer />
+          <v-dialog v-model="dialog" persistent>
+            <template v-slot:activator="{ props }">
+              <v-btn elevation="4" color="indigo-lighten-2" v-bind="props">Editar detalles</v-btn>
+            </template>
+            <v-card>
+              <v-card-title>
+                <span class="text-h5">Editar detalles de factura</span>
+              </v-card-title>
+              <v-card-text>
+                <v-container>
+                  <v-row>
+                    <v-col cols="12" sm="6" md="6">
+                      <v-text-field
+                        label="Centro:"
+                        v-model="invoiceFields.Workplace"
+                      ></v-text-field>
+                    </v-col>
+                    <v-col cols="12" sm="6" md="6">
+                      <v-text-field
+                        label="Fecha probable de pago"
+                        type="date"
+                        hint="Este dato es únicamente una estimación interna."
+                      ></v-text-field>
+                    </v-col>
+                    <v-col cols="12">
+                      <v-textarea label="Notas:" v-model="invoiceFields.InvoiceNotes"></v-textarea>
+                    </v-col>
+                  </v-row>
+                </v-container>
+              </v-card-text>
+              <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn
+                  color="blue-darken-1"
+                  variant="text"
+                  @click="dialog = false"
+                >
+                  Close
+                </v-btn>
+                <v-btn
+                  color="blue-darken-1"
+                  variant="text"
+                  @click="updateDetails(invoiceFields)"
+                >
+                  Save
+                </v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-dialog>
+          <v-btn
+            elevation="4"
+            color="indigo-lighten-2"
+            v-if="!invoice.employee_mantis"
+            >Asociar Mantis</v-btn
+          >
+        </v-card-actions>
         <v-divider class="ma-5"></v-divider>
         <div class="d-flex justify-space-between pa-5">
           <div class="headline">
-            <v-chip v-if="invoice.Active"
-            class="ma-2"
-            color="error"
-            text-color="white"
-            prepend-icon="mdi-close-circle"
-          >
-          Active
-          </v-chip>
-          <v-chip v-else
-            class="ma-2"
-            color="teal"
-            text-color="white"
-            prepend-icon="mdi-check-circle"
-          >
-          Closed
-          </v-chip>
+            <v-chip
+              v-if="invoice.Active"
+              class="ma-2"
+              color="error"
+              text-color="white"
+              prepend-icon="mdi-close-circle"
+            >
+              Active
+            </v-chip>
+            <v-chip
+              v-else
+              class="ma-2"
+              color="teal"
+              text-color="white"
+              prepend-icon="mdi-check-circle"
+            >
+              Closed
+            </v-chip>
           </div>
           <div>
-            <div class="headline">
-              Número de factura:
-            </div>
-            <div>
-              Cliente:
-            </div>
+            <div class="headline">Número de factura:</div>
+            <div>Cliente:</div>
           </div>
           <div>
             <div>
@@ -43,8 +97,8 @@
             </div>
           </div>
           <div>
-            <div>Fecha de factura: </div>
-            <div>Fecha de vencimiento: </div>
+            <div>Fecha de factura:</div>
+            <div>Fecha de vencimiento:</div>
           </div>
           <div>
             <div>
@@ -55,12 +109,8 @@
             </div>
           </div>
           <div>
-            <div>
-              Balance:
-            </div>
-            <div>
-              Días Vencida:
-            </div>
+            <div>Balance:</div>
+            <div>Días Vencida:</div>
           </div>
           <div>
             <div>
@@ -69,6 +119,14 @@
             <div>
               {{ invoice.expired_days }}
             </div>
+          </div>
+          <div>
+            <div>Estado:</div>
+            <div>Notas:</div>
+          </div>
+          <div>
+            <div>{{ invoice.last_action.ActionName }}</div>
+            <div>{{ invoice.InvoiceNotes }}</div>
           </div>
         </div>
         <v-divider class="ma-5" v-if="invoice.Workplace"></v-divider>
@@ -115,25 +173,33 @@
     </v-col>
     <v-col cols="6" md="6" justify="center">
       <v-card>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn elevation="4" color="indigo-lighten-2">Nueva acción</v-btn>
+        </v-card-actions>
+        <v-divider></v-divider>
         <v-card-text>
-                <v-table>
-                  <thead>
-                    <th>Fecha:</th>
-                    <th>Acción:</th>
-                    <th>Motivo:</th>
-                    <th>Resultado:</th>
-                    <th>Próxima cita:</th>
-                  </thead>
-                  <tbody>
-                    <tr v-for="followup in followups" :key="followup.FolloUpId">
-                      <td>{{ followup.Date }}</td>
-                      <td>{{ followup.action.ActionName }}</td>
-                      <td>{{ followup.Motive }}</td>
-                      <td>{{ followup.Result }}</td>
-                      <td>{{ followup.NextAppointmentDate }}</td>
-                    </tr>
-                  </tbody>
-                </v-table>
+          <v-table>
+            <thead>
+              <th>Fecha:</th>
+              <th>Acción:</th>
+              <th>Motivo:</th>
+              <th>Resultado:</th>
+              <th>Próxima cita:</th>
+            </thead>
+            <tbody>
+              <tr v-for="followup in followups" :key="followup.FolloUpId">
+                <td>{{ followup.Date }}</td>
+                <td>{{ followup.action.ActionName }}</td>
+                <td>{{ followup.Motive }}</td>
+                <td>{{ followup.Result }}</td>
+                <td>{{ followup.NextAppointmentDate }}</td>
+                <td>
+                  <v-btn><v-icon icon="mdi-delete-outline" /></v-btn>
+                </td>
+              </tr>
+            </tbody>
+          </v-table>
         </v-card-text>
       </v-card>
     </v-col>
@@ -141,12 +207,19 @@
       <v-card color="indigo-lighten-4">
         <div class="d-flex justify-space-between pa-5">
           <div>
-            <div>Usuario Mantis: {{ invoice.employee_mantis?.EmployeeName  }}</div>
-            <div>Motivo Incidencia: {{ invoice.incidence_cause?.IncidenceName }}</div>
+            <div>
+              Usuario Mantis: {{ invoice.employee_mantis?.EmployeeName }}
+            </div>
+            <div>
+              Motivo Incidencia: {{ invoice.incidence_cause?.IncidenceName }}
+            </div>
           </div>
           <div>
-            <div>Asignación Mantis CS: {{ invoice.employee_bug_mantis?.EmployeeName }}</div>
-            <div>Fecha Incidencia: </div>
+            <div>
+              Asignación Mantis CS:
+              {{ invoice.employee_bug_mantis?.EmployeeName }}
+            </div>
+            <div>Fecha Incidencia:</div>
           </div>
           <div>
             <div>Abono Seguimiento Finanzas:</div>
@@ -165,30 +238,67 @@ import { useAuthStore } from "@/store/auth";
 export default {
   data() {
     return {
+      dialog: false,
       invoice: useInvoiceStore().$state.invoice,
       active_balance: [],
-      followups: []
+      followups: [],
+      invoiceFields: {
+        Workplace: useInvoiceStore().$state.invoice.Workplace,
+        InvoiceNotes: useInvoiceStore().$state.invoice.InvoiceNotes
+      },
+      mantisFields: {
+        employee_mantis: '',
+        IncidenceCause: '',
+        employee_bug_mantis: ''
+      }
     };
   },
-  mounted: async function() {
-      const auth = useAuthStore()
-      const options = {
-        method: "get",
-        baseURL: auth.$state.baseUrl,
-        headers: {
-          Authorization: `Bearer ${auth.$state.access_token}`,
-        }
-      }
-      try {
-        this.active_balance = await $fetch(`/api/active_balance/${this.invoice.InvoiceId}`, options)
-        this.followups = await $fetch(`/api/followup/${this.invoice.InvoiceId}`, options)
-      } catch (error) {
-        console.log(error)
-      }
+  mounted: async function () {
+    const auth = useAuthStore();
+    const options = {
+      method: "get",
+      baseURL: auth.$state.baseUrl,
+      headers: {
+        Authorization: `Bearer ${auth.$state.access_token}`,
+      },
+    };
+    try {
+      this.active_balance = await $fetch(
+        `/api/active_balance/${this.invoice.InvoiceId}`,
+        options
+      );
+      this.followups = await $fetch(
+        `/api/followup/${this.invoice.InvoiceId}`,
+        options
+      );
+    } catch (error) {
+      console.log(error);
+    }
   },
   methods: {
-    roundedBalance: (balance) => Math.round((balance + Number.EPSILON) * 100) / 100,
-  }
+    roundedBalance: (balance) =>
+      Math.round((balance + Number.EPSILON) * 100) / 100,
+    async updateDetails(payload) {
+      const auth = useAuthStore()
+      const invoiceStore = useInvoiceStore()
+      const options = {
+        method: 'put',
+        baseURL: auth.$state.baseUrl,
+        headers: {
+          Authorization: `Bearer ${auth.$state.access_token}`
+        },
+      }
+      options.body = payload 
+      try {
+        let response = await $fetch(`/api/invoice/${this.invoice.InvoiceId}`, options)
+        invoiceStore.fetchInvoice(this.invoice.InvoiceId)
+        this.invoice = response
+        this.dialog = false
+      } catch (error) {
+        console.log(error) 
+      }
+    }
+  },
 };
 </script>
 
