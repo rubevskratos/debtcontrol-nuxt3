@@ -1,10 +1,12 @@
 <template>
   <v-row justify="center" align="start">
+    <!-- Detalles de factura-->
     <v-col cols="12" md="12">
       <v-card class="mt-5">
         <v-card-actions>
           <h3 class="pa-1">Detalles de factura:</h3>
           <v-spacer />
+          <!-- Actualización de detalles de factura-->
           <v-dialog v-model="dialog" persistent>
             <template v-slot:activator="{ props }">
               <v-btn elevation="4" color="indigo-lighten-2" v-bind="props">Editar detalles</v-btn>
@@ -54,12 +56,73 @@
               </v-card-actions>
             </v-card>
           </v-dialog>
-          <v-btn
-            elevation="4"
-            color="indigo-lighten-2"
-            v-if="!invoice.employee_mantis"
-            >Asociar Mantis</v-btn
+          <!-- Actualización de detalles de mantis-->
+          <v-dialog v-model="dialogMantis" persistent>
+            <template v-slot:activator="{ props }">
+              <v-btn
+              v-bind="props"
+              elevation="4"
+              color="indigo-lighten-2"
+              v-if="!invoice.employee_mantis"
+              >Asociar Mantis</v-btn
           >
+            </template>
+            <v-card>
+              <v-card-title>
+                <span class="text-h5">Asociar Mantis</span>
+              </v-card-title>
+              <v-card-text>
+                <v-container>
+                  <v-row>
+                    <v-col cols="12" sm="6" md="6">
+                      <v-select
+                        label="Empleado Mantis"
+                        :items="employees"
+                        item-title="EmployeeName"
+                        item-value="EmployeeId"
+                        v-model="mantisFields.employee_mantis"
+                      ></v-select>
+                    </v-col>
+                    <v-col cols="12" sm="6" md="6">
+                      <v-select
+                        label="Usuario Error Mantis"
+                        :items="employees"
+                        item-title="EmployeeName"
+                        item-value="EmployeeId"
+                        v-model="mantisFields.employee_bug_mantis"
+                      ></v-select>
+                    </v-col>
+                    <v-col cols="12" sm="6" md="6">
+                      <v-select
+                        label="Motivo de Incidencia"
+                        :items="incidenceCauses"
+                        item-title="IncidenceName"
+                        item-value="IncidenceCauseId"
+                        v-model="mantisFields.IncidenceCause"
+                      ></v-select>
+                    </v-col>
+                  </v-row>
+                </v-container>
+              </v-card-text>
+              <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn
+                  color="blue-darken-1"
+                  variant="text"
+                  @click="dialogMantis = false"
+                >
+                  Close
+                </v-btn>
+                <v-btn
+                  color="blue-darken-1"
+                  variant="text"
+                  @click="updateDetails(mantisFields)"
+                >
+                  Save
+                </v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-dialog>
         </v-card-actions>
         <v-divider class="ma-5"></v-divider>
         <div class="d-flex justify-space-between pa-5">
@@ -129,12 +192,14 @@
             <div>{{ invoice.InvoiceNotes }}</div>
           </div>
         </div>
+        <!-- Datos de Centro, sólo visible si existe un centro asociado. -->
         <v-divider class="ma-5" v-if="invoice.Workplace"></v-divider>
         <v-card-text v-if="invoice.Workplace">
           Centro asociado:{{ invoice.Workplace }}
         </v-card-text>
       </v-card>
     </v-col>
+    <!-- Balance de Factura -->
     <v-col cols="6" md="6" justify="center" align="start">
       <v-card>
         <v-card-text>
@@ -171,6 +236,7 @@
         </v-card-text>
       </v-card>
     </v-col>
+    <!-- Histórico de acciones -->
     <v-col cols="6" md="6" justify="center">
       <v-card>
         <v-card-actions>
@@ -203,6 +269,7 @@
         </v-card-text>
       </v-card>
     </v-col>
+    <!-- Sección datos Mantis -->
     <v-col cols="12" md="12" justify="center" v-if="invoice.employee_mantis">
       <v-card color="indigo-lighten-4">
         <div class="d-flex justify-space-between pa-5">
@@ -239,7 +306,10 @@ export default {
   data() {
     return {
       dialog: false,
+      dialogMantis: false,
       invoice: useInvoiceStore().$state.invoice,
+      employees: [],
+      incidenceCauses: [],
       active_balance: [],
       followups: [],
       invoiceFields: {
@@ -271,6 +341,9 @@ export default {
         `/api/followup/${this.invoice.InvoiceId}`,
         options
       );
+      this.employees = await $fetch('/api/employee',options)
+      this.employees = this.employees.filter(e => e.Status)
+      this.incidenceCauses = await $fetch('/api/incidence_cause', options)
     } catch (error) {
       console.log(error);
     }
@@ -289,11 +362,13 @@ export default {
         },
       }
       options.body = payload 
+      console.log(payload)
       try {
         let response = await $fetch(`/api/invoice/${this.invoice.InvoiceId}`, options)
         invoiceStore.fetchInvoice(this.invoice.InvoiceId)
         this.invoice = response
         this.dialog = false
+        this.dialogMantis = false
       } catch (error) {
         console.log(error) 
       }
