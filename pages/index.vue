@@ -1,7 +1,7 @@
 <template>
-    <v-row style="margin:10%" justify="center" align="center">
+    <v-row class="flex fill-height ma-5" justify="center" align="center">
       <v-col cols="12" sm="8" md="8 ">
-        <v-card>
+        <v-card justify="center">
           <v-card-title primary-title>
             <div>
               <h3 class="headline mb-0">{{ greeting() }}!</h3>
