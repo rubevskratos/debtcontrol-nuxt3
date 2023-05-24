@@ -110,9 +110,11 @@ export default {
         }
       }
       options.body = this.newFollowUp
+      console.log(this.invoices)
       this.invoices.forEach(async invoice => {
         try {
           options.body.Invoice_id = invoice.InvoiceId
+          console.log(options)
           const response = await $fetch('/api/followup', options)
         } catch (error) {
           console.log(error)

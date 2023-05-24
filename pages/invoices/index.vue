@@ -31,7 +31,7 @@
     data() {
       return {
         currentOrder: 'desc',
-        invoiceList: [],
+        invoiceList: reactive([]),
         pageList: [],
         pagination: {
           length: 0,

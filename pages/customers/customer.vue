@@ -209,6 +209,11 @@
           class="overflow-auto"
           style="max-height: 90vh"
         >
+        <v-card v-if="selectedInvoices.filter(e => e).length > 0">
+          <v-card-actions>
+            <NewActionComponent :invoices="selectedInvoices" @new-followup=""/>
+          </v-card-actions>
+        </v-card>
           <v-pagination
             v-if="pagination.length"
             :length="pagination.length"
@@ -216,11 +221,19 @@
             @click="updatePagination('actions')"
           >
           </v-pagination>
-          <InvoiceCard
-            v-for="(invoice, i) in invoiceActions"
-            :invoice="invoice"
-            :key="i"
-          />
+          <v-card v-for="(invoice, i) in invoiceActions">
+            <v-row align="center">
+              <v-col cols="1">
+                <v-checkbox v-model="selectedInvoices[i]" :value="invoice" @change="console.log(selectedInvoices)"></v-checkbox>
+              </v-col>
+              <v-col cols="11">
+                <InvoiceCard
+                  :invoice="invoice"
+                  :key="i"
+                />
+              </v-col>
+            </v-row>
+          </v-card>
           <v-card v-if="!pagination.length">
             <v-card-text> No invoice history found. </v-card-text>
           </v-card>
@@ -252,6 +265,7 @@ export default {
       customer: useCustomerStore().$state.customer,
       invoiceHistory: [],
       invoiceActions: [],
+      selectedInvoices: [],
       inputData: {
         DebtDistribution: useCustomerStore().$state.customer.DebtDistribution,
         ClientNotes: useCustomerStore().$state.customer.ClientNotes,

@@ -7,60 +7,7 @@
           <h3 class="pa-1">Detalles de factura:</h3>
           <v-spacer />
           <!-- Actualización de detalles de factura-->
-          <v-dialog v-model="dialog" persistent>
-            <template v-slot:activator="{ props }">
-              <v-btn elevation="4" color="indigo-lighten-2" v-bind="props"
-                >Editar detalles</v-btn
-              >
-            </template>
-            <v-card>
-              <v-card-title>
-                <span class="text-h5">Editar detalles de factura</span>
-              </v-card-title>
-              <v-card-text>
-                <v-container>
-                  <v-row>
-                    <v-col cols="12" sm="6" md="6">
-                      <v-text-field
-                        label="Centro:"
-                        v-model="invoiceFields.Workplace"
-                      ></v-text-field>
-                    </v-col>
-                    <v-col cols="12" sm="6" md="6">
-                      <v-text-field
-                        label="Fecha probable de pago"
-                        type="date"
-                        hint="Este dato es únicamente una estimación interna."
-                      ></v-text-field>
-                    </v-col>
-                    <v-col cols="12">
-                      <v-textarea
-                        label="Notas:"
-                        v-model="invoiceFields.InvoiceNotes"
-                      ></v-textarea>
-                    </v-col>
-                  </v-row>
-                </v-container>
-              </v-card-text>
-              <v-card-actions>
-                <v-spacer></v-spacer>
-                <v-btn
-                  color="blue-darken-1"
-                  variant="text"
-                  @click="dialog = false"
-                >
-                  Close
-                </v-btn>
-                <v-btn
-                  color="blue-darken-1"
-                  variant="text"
-                  @click="updateDetails(invoiceFields)"
-                >
-                  Save
-                </v-btn>
-              </v-card-actions>
-            </v-card>
-          </v-dialog>
+          <update-invoice-details-component :invoices="[invoice]" @update-details="refeshInvoice()"/>
           <!-- Actualización de detalles de mantis -->
           <v-dialog v-model="dialogMantis" persistent>
             <template v-slot:activator="{ props }">
@@ -330,17 +277,12 @@ import { useAuthStore } from "@/store/auth";
 export default {
   data() {
     return {
-      dialog: false,
       dialogMantis: false,
       invoice: useInvoiceStore().$state.invoice,
       employees: [],
       incidenceCauses: [],
       active_balance: [],
       followups: reactive([]),
-      invoiceFields: {
-        Workplace: useInvoiceStore().$state.invoice.Workplace,
-        InvoiceNotes: useInvoiceStore().$state.invoice.InvoiceNotes,
-      },
       mantisFields: {
         EmployeeMantis_id: "",
         IncidenceCause_id: "",
@@ -423,6 +365,16 @@ export default {
         console.log(error)
       }
     },
+    async refeshInvoice() {
+      const invoiceStore = useInvoiceStore;
+      try {
+        await useInvoiceStore().fetchInvoice(this.invoice.InvoiceId)
+        this.invoice = useInvoiceStore().$state.invoice
+        console.log(this.invoice)
+      } catch (error) {
+        console.log(error)
+      }
+    }
   },
 };
 </script>
