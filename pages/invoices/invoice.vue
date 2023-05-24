@@ -267,62 +267,6 @@
         <v-card-actions>
           <v-spacer></v-spacer>
           <new-action-component :invoices="[invoice]"/>
-          <!-- <v-dialog v-model="dialogFollowUps" persistent max-width="50%">
-            <template v-slot:activator="{ props }">
-              <v-btn elevation="4" color="indigo-lighten-2" v-bind="props"
-                >Nueva acción</v-btn
-              >
-            </template>
-            <v-card>
-              <v-card-title>
-                <span class="headline">Nueva acción</span>
-              </v-card-title>
-              <v-card-text>
-                <v-form>
-                  <v-row>
-                    <v-col cols="12">
-                      <v-text-field
-                        label="Fecha de Incidencia"
-                        type="date"
-                        v-model="newFollowUp.Date"
-                      ></v-text-field>
-                    </v-col>
-                    <v-col cols="6">
-                      <v-select label="Acción"
-                      :items="actions"
-                      item-title="ActionName"
-                      item-value="ActionId"
-                      v-model="newFollowUp.Action_id"></v-select>
-                    </v-col>
-                    <v-col cols="6">
-                      <v-text-field label="Motivo de la acción"
-                      v-model="newFollowUp.Motive"></v-text-field>
-                    </v-col>
-                    <v-col cols="12">
-                      <v-textarea label="Resultado"
-                      v-model="newFollowUp.Result"> </v-textarea>
-                    </v-col>
-                    <v-col cols="12">
-                      <v-text-field label="Próxima Cita" type="date" v-model="newFollowUp.NextAppointmentDate">
-                      </v-text-field>
-                    </v-col>
-                  </v-row>
-                </v-form>
-              </v-card-text>
-              <v-card-actions>
-                <v-spacer></v-spacer>
-                <v-btn
-                  color="blue darken-1"
-                  flat
-                  @click.native="dialogFollowUps = false"
-                  >Close</v-btn
-                >
-                <v-btn color="blue darken-1" flat @click.native="createNewFollowUp"
-                  >Save</v-btn
-                >
-              </v-card-actions>
-            </v-card>
-          </v-dialog> -->
         </v-card-actions>
         <v-divider></v-divider>
         <v-card-text>
@@ -392,7 +336,6 @@ export default {
       invoice: useInvoiceStore().$state.invoice,
       employees: [],
       incidenceCauses: [],
-      //actions: [],
       active_balance: [],
       followups: [],
       invoiceFields: {
@@ -407,14 +350,6 @@ export default {
         FinanceFollowUpPayment: "",
         CSFollowUpPayment: ""
       }
-      // newFollowUp: {
-      //   Invoice_id: useInvoiceStore().$state.invoice.InvoiceId,
-      //   Action_id: '',
-      //   NextAppointmentDate: '', //yyyy-mm-dd
-      //   Date: '', //yyyy-mm-dd
-      //   Motive: '',
-      //   Result: ''
-      // }
     };
   },
   mounted: async function () {
@@ -438,7 +373,6 @@ export default {
       this.employees = await $fetch("/api/employee", options);
       this.employees = this.employees.filter((e) => e.Status);
       this.incidenceCauses = await $fetch("/api/incidence_cause", options);
-      //this.actions = await $fetch('/api/action', options)
     } catch (error) {
       console.log(error);
     }
@@ -474,26 +408,6 @@ export default {
     deleteFollowUp(id) {
       console.log(`Se borraría el mensaje con id: ${id}`)
     },
-    // async createNewFollowUp() {
-    //   const auth = useAuthStore()
-    //   const options = {
-    //     method:'post',
-    //     baseURL:auth.$state.baseUrl,
-    //     headers: {
-    //       Authorization: `Bearer ${auth.$state.access_token}`
-    //     }
-    //   }
-    //   options.body = this.newFollowUp
-    //   try {
-    //     const response = await $fetch('/api/followup', options)
-    //     options.method = 'get'
-    //     delete options.body
-    //     this.followups = await $fetch(`/api/followup/${this.invoice.InvoiceId}`,options)
-    //     this.dialogFollowUps = false
-    //   } catch (error) {
-    //     console.log(error)
-    //   }
-    // }
   },
 };
 </script>
