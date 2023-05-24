@@ -266,7 +266,7 @@
       <v-card>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <new-action-component :invoices="[invoice]"/>
+          <new-action-component :invoices="[invoice]" @new-followup="refreshFollowups"/>
         </v-card-actions>
         <v-divider></v-divider>
         <v-card-text>
@@ -286,7 +286,7 @@
                 <td>{{ followup.Result }}</td>
                 <td>{{ followup.NextAppointmentDate }}</td>
                 <td>
-                  <v-btn @click="deleteFollowUp(followup.FollowUpId)"><v-icon icon="mdi-delete-outline" /></v-btn>
+                  <update-action-component :followup="followup" @update-followup="refreshFollowups"/>
                 </td>
               </tr>
             </tbody>
@@ -332,12 +332,11 @@ export default {
     return {
       dialog: false,
       dialogMantis: false,
-      dialogFollowUps: false,
       invoice: useInvoiceStore().$state.invoice,
       employees: [],
       incidenceCauses: [],
       active_balance: [],
-      followups: [],
+      followups: reactive([]),
       invoiceFields: {
         Workplace: useInvoiceStore().$state.invoice.Workplace,
         InvoiceNotes: useInvoiceStore().$state.invoice.InvoiceNotes,
@@ -405,8 +404,24 @@ export default {
         console.log(error);
       }
     },
-    deleteFollowUp(id) {
-      console.log(`Se borraría el mensaje con id: ${id}`)
+    async refreshFollowups() {
+      const auth = useAuthStore();
+      const invoiceStore = useInvoiceStore();
+      const options = {
+        method: "get",
+        baseURL: auth.$state.baseUrl,
+        headers: {
+          Authorization: `Bearer ${auth.$state.access_token}`,
+        },
+      };
+      try {
+        this.followups = await $fetch(
+        `/api/followup/${this.invoice.InvoiceId}`,
+        options
+      );
+      } catch (error) {
+        console.log(error)
+      }
     },
   },
 };

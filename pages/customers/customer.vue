@@ -246,7 +246,7 @@ export default {
         { name: "Cuenta", active: true },
         { name: "Contacto", active: false },
         { name: "Historial de Facturas", active: false },
-        { name: "Historial de acciones", active: false },
+        { name: "Facturas Activas", active: false },
         { name: "Planes de Pago", active: false },
       ],
       customer: useCustomerStore().$state.customer,

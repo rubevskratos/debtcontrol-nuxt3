@@ -2,12 +2,12 @@
   <v-dialog v-model="dialog" persistent max-width="50%">
     <template v-slot:activator="{ props }">
       <v-btn elevation="4" color="indigo-lighten-2" v-bind="props"
-        >Nueva acción</v-btn
+        ><v-icon>mdi-pencil-outline</v-icon></v-btn
       >
     </template>
     <v-card>
       <v-card-title>
-        <span class="headline">Nueva acción</span>
+        <span class="headline">Editar Acción</span>
       </v-card-title>
       <v-card-text>
         <v-form>
@@ -18,24 +18,24 @@
                 :items="actions"
                 item-title="ActionName"
                 item-value="ActionId"
-                v-model="newFollowUp.Action_id"
+                v-model="updateFollowUp.Action_id"
               ></v-select>
             </v-col>
             <v-col cols="6">
               <v-text-field
                 label="Motivo de la acción"
-                v-model="newFollowUp.Motive"
+                v-model="updateFollowUp.Motive"
               ></v-text-field>
             </v-col>
             <v-col cols="12">
-              <v-textarea label="Resultado" v-model="newFollowUp.Result">
+              <v-textarea label="Resultado" v-model="updateFollowUp.Result">
               </v-textarea>
             </v-col>
             <v-col cols="12">
               <v-text-field
                 label="Próxima Cita"
                 type="date"
-                v-model="newFollowUp.NextAppointmentDate"
+                v-model="updateFollowUp.NextAppointmentDate"
               >
               </v-text-field>
             </v-col>
@@ -50,7 +50,7 @@
           @click.native="dialog = false"
           >Close</v-btn
         >
-        <v-btn color="blue darken-1" flat @click.native="createNewFollowUp"
+        <v-btn color="blue darken-1" flat @click.native="UpdateFollowUp"
           >Save</v-btn
         >
       </v-card-actions>
@@ -60,26 +60,23 @@
 
 <script setup>
   const props = defineProps({
-    invoices: Array
+    followup: Object
   })
 </script>
 
 <script>
 import { useAuthStore } from "@/store/auth";
-import { useInvoiceStore } from "@/store/invoices";
-
 
 export default {
   data() {
     return {
       actions: [],
       dialog: false,
-      newFollowUp: {
-        Invoice_id: "",
-        Action_id: "",
-        NextAppointmentDate: "", //yyyy-mm-dd
-        Motive: "",
-        Result: "",
+      updateFollowUp: {
+        Action_id: this.followup.Action_id,
+        NextAppointmentDate: this.followup.NextAppointmentDate, //yyyy-mm-dd
+        Motive: this.followup.Motive,
+        Result: this.followup.Result,
       },
       errors: []
     };
@@ -100,27 +97,24 @@ export default {
     }
   },
   methods: {
-    async createNewFollowUp() {
+    async UpdateFollowUp() {
       const auth = useAuthStore()
       const options = {
-        method:'post',
+        method:'put',
         baseURL:auth.$state.baseUrl,
         headers: {
           Authorization: `Bearer ${auth.$state.access_token}`
         }
       }
-      options.body = this.newFollowUp
-      this.invoices.forEach(async invoice => {
+      options.body = this.updateFollowUp
         try {
-          options.body.Invoice_id = invoice.InvoiceId
-          const response = await $fetch('/api/followup', options)
+          const response = await $fetch(`/api/followup/${this.followup.FollowUpId}`, options)
+          this.dialog = false
+          this.$emit('update-followup')
         } catch (error) {
           console.log(error)
           this.errors.push(error)
         }
-      })
-      this.dialog = false
-      this.$emit('new-followup')
     },
     flushForm() {
       this.newFollowUp.Action_id = ""
