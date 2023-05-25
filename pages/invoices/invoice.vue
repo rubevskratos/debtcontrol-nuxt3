@@ -226,13 +226,15 @@ export default {
     async refreshFollowups() {
       const auth = useAuthStore();
       const invoiceStore = useInvoiceStore();
-      const options = {
-        method: "get",
-        baseURL: auth.$state.baseUrl,
-        headers: {
-          Authorization: `Bearer ${auth.$state.access_token}`,
-        },
-      };
+      const options = auth.defineOptions('GET');
+      // const options = {
+      //   method: "get",
+      //   baseURL: auth.$state.baseUrl,
+      //   headers: {
+      //     Authorization: `Bearer ${auth.$state.access_token}`,
+      //   },
+      //};
+      console.log(options)
       try {
         this.followups = await $fetch(
         `/api/followup/${this.invoice.InvoiceId}`,
