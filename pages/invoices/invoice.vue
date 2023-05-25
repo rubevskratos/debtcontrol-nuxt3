@@ -129,7 +129,7 @@
       <v-card>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <new-action-component :invoices="[invoice]" @new-followup="refreshFollowups"/>
+          <new-action-component :invoices="[invoice]" :customer="customer" @new-followup="refreshFollowups"/>
         </v-card-actions>
         <v-divider></v-divider>
         <v-card-text>
@@ -149,7 +149,7 @@
                 <td>{{ followup.Result }}</td>
                 <td>{{ followup.NextAppointmentDate }}</td>
                 <td>
-                  <update-action-component :followup="followup" @update-followup="refreshFollowups"/>
+                  <update-action-component :followup="followup" :customer="customer" @update-followup="refreshFollowups"/>
                 </td>
               </tr>
             </tbody>
@@ -189,6 +189,7 @@
 <script>
 import { useInvoiceStore } from "@/store/invoices";
 import { useAuthStore } from "@/store/auth";
+import { useCustomerStore } from "@/store/customers";
 
 export default {
   data() {
@@ -196,17 +197,23 @@ export default {
       invoice: useInvoiceStore().$state.invoice,
       active_balance: [],
       followups: reactive([]),
+      customer: useCustomerStore().$state.customer
     };
+  },
+  beforeMount: async function() {
+    const customerStore = useCustomerStore()
+    const invoiceStore = useInvoiceStore()
+    try {
+      let invoice = invoiceStore.$state.invoice
+      let response = await customerStore.fetchCustomer(invoice.customer.CustomerId)
+    } catch (error) {
+      console.log(error)
+    }
   },
   mounted: async function () {
     const auth = useAuthStore();
-    const options = {
-      method: "get",
-      baseURL: auth.$state.baseUrl,
-      headers: {
-        Authorization: `Bearer ${auth.$state.access_token}`,
-      },
-    };
+    const options = auth.defineOptions('GET')
+
     try {
       this.active_balance = await $fetch(
         `/api/active_balance/${this.invoice.InvoiceId}`,
@@ -215,7 +222,7 @@ export default {
       this.followups = await $fetch(
         `/api/followup/${this.invoice.InvoiceId}`,
         options
-      );
+      );      
     } catch (error) {
       console.log(error);
     }
@@ -227,14 +234,7 @@ export default {
       const auth = useAuthStore();
       const invoiceStore = useInvoiceStore();
       const options = auth.defineOptions('GET');
-      // const options = {
-      //   method: "get",
-      //   baseURL: auth.$state.baseUrl,
-      //   headers: {
-      //     Authorization: `Bearer ${auth.$state.access_token}`,
-      //   },
-      //};
-      console.log(options)
+
       try {
         this.followups = await $fetch(
         `/api/followup/${this.invoice.InvoiceId}`,

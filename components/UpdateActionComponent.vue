@@ -28,6 +28,16 @@
               ></v-text-field>
             </v-col>
             <v-col cols="12">
+              <v-select
+                label="Persona de Contacto"
+                :items="customer_contacts"
+                item-title="ContactName"
+                item-value="ContactId"
+                v-model="updateFollowUp.CustomerContact_Id"
+              >
+              </v-select>
+            </v-col>
+            <v-col cols="12">
               <v-textarea label="Resultado" v-model="updateFollowUp.Result">
               </v-textarea>
             </v-col>
@@ -60,7 +70,8 @@
 
 <script setup>
   const props = defineProps({
-    followup: Object
+    followup: Object,
+    customer: Object
   })
 </script>
 
@@ -76,9 +87,10 @@ export default {
         Action_id: this.followup.Action_id,
         NextAppointmentDate: this.followup.NextAppointmentDate, //yyyy-mm-dd
         Motive: this.followup.Motive,
-        Result: this.followup.Result,
+        Result: this.followup.Result
       },
-      errors: []
+      errors: [],
+      customer_contacts: []
     };
   },
   mounted: async function () {
@@ -92,6 +104,9 @@ export default {
     };
     try {
       this.actions = await $fetch('/api/action', options)
+      if(this.customer.CustomerId) {
+        this.customer_contacts = await $fetch(`/api/customer_contact/${this.customer.CustomerId}`, options)
+      }
     } catch (error) {
       console.log(error);
     }
@@ -107,6 +122,7 @@ export default {
         }
       }
       options.body = this.updateFollowUp
+      console.log(options.body)
         try {
           const response = await $fetch(`/api/followup/${this.followup.FollowUpId}`, options)
           this.dialog = false
