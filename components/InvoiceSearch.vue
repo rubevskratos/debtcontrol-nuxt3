@@ -168,12 +168,17 @@ export default {
         const params = this.createParams(this.params);
         options.params = params;
         let invoices = await $fetch("/api/invoice", options);
-        
+        //Redondeamos el balance
+        invoices.forEach((invoice, i) => {
+          invoices[i].Balance = this.roundedBalance(invoice.Balance)
+        })
         this.$emit("show-results", invoices);
       } catch (error) {
         console.log("Error on getInvoices in InvoiceSearch" + error);
       }
     },
+    roundedBalance: (balance) =>
+      Math.round((balance + Number.EPSILON) * 100) / 100,
   },
   async mounted() {
        const auth = useAuthStore()

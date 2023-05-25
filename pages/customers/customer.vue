@@ -209,11 +209,14 @@
           class="overflow-auto"
           style="max-height: 90vh"
         >
-        <v-card v-if="selectedInvoices.filter(e => e).length > 0">
-          <v-card-actions>
-            <NewActionComponent :invoices="selectedInvoices" @new-followup=""/>
-          </v-card-actions>
-        </v-card>
+          <v-card v-if="selectedInvoices.filter((e) => e).length > 0">
+            <v-card-actions>
+              <NewActionComponent
+                :invoices="selectedInvoices"
+                @new-followup=""
+              />
+            </v-card-actions>
+          </v-card>
           <v-pagination
             v-if="pagination.length"
             :length="pagination.length"
@@ -224,13 +227,14 @@
           <v-card v-for="(invoice, i) in invoiceActions">
             <v-row align="center">
               <v-col cols="1">
-                <v-checkbox v-model="selectedInvoices[i]" :value="invoice" @change="console.log(selectedInvoices)"></v-checkbox>
+                <v-checkbox
+                  v-model="selectedInvoices[i]"
+                  :value="invoice"
+                  @change="console.log(selectedInvoices)"
+                ></v-checkbox>
               </v-col>
               <v-col cols="11">
-                <InvoiceCard
-                  :invoice="invoice"
-                  :key="i"
-                />
+                <InvoiceCard :invoice="invoice" :key="i" />
               </v-col>
             </v-row>
           </v-card>
@@ -377,12 +381,17 @@ export default {
       }
       try {
         let invoices = await $fetch("/api/invoice", options);
+        //Redondeamos el balance
+        invoices.forEach((invoice, i) => {
+          invoices[i].Balance = this.roundedBalance(invoice.Balance);
+        });
         this.showResults(invoices, type);
       } catch (error) {
         console.log(error);
       }
     },
-
+    roundedBalance: (balance) =>
+      Math.round((balance + Number.EPSILON) * 100) / 100,
     showResults(invoiceList, type) {
       let totalLength = invoiceList.length;
       this.pagination.length = Math.ceil(totalLength / this.pagination.limit);
