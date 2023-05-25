@@ -7,93 +7,9 @@
           <h3 class="pa-1">Detalles de factura:</h3>
           <v-spacer />
           <!-- Actualización de detalles de factura-->
-          <update-invoice-details-component :invoices="[invoice]" @update-details="refeshInvoice()"/>
+          <update-invoice-details-component :invoices="[invoice]" @update-details="refreshInvoice()"/>
           <!-- Actualización de detalles de mantis -->
-          <v-dialog v-model="dialogMantis" persistent>
-            <template v-slot:activator="{ props }">
-              <v-btn
-                v-bind="props"
-                elevation="4"
-                color="indigo-lighten-2"
-                v-if="!invoice.EmployeeMantis_id"
-                >Asociar Mantis</v-btn
-              >
-            </template>
-            <v-card>
-              <v-card-title>
-                <span class="text-h5">Asociar Mantis</span>
-              </v-card-title>
-              <v-card-text>
-                <v-container>
-                  <v-row>
-                    <v-col cols="12" sm="6" md="6">
-                      <v-select
-                        label="Empleado Mantis"
-                        :items="employees"
-                        item-title="EmployeeName"
-                        item-value="EmployeeId"
-                        v-model="mantisFields.EmployeeMantis_id"
-                      ></v-select>
-                    </v-col>
-                    <v-col cols="12" sm="6" md="6">
-                      <v-select
-                        label="Usuario Error Mantis"
-                        :items="employees"
-                        item-title="EmployeeName"
-                        item-value="EmployeeId"
-                        v-model="mantisFields.EmployeeBugMantis_id"
-                      ></v-select>
-                    </v-col>
-                    <v-col cols="12" sm="6" md="6">
-                      <v-select
-                        label="Motivo de Incidencia"
-                        :items="incidenceCauses"
-                        item-title="IncidenceName"
-                        item-value="IncidenceCauseId"
-                        v-model="mantisFields.IncidenceCause_id"
-                      ></v-select>
-                    </v-col>
-                    <v-col cols="12" sm="6" md="6">
-                      <v-text-field
-                        label="Fecha de Incidencia Mantis"
-                        v-model="mantisFields.IncidenceDate"
-                        type="date"
-                      ></v-text-field>
-                    </v-col>
-                    <v-col cols="12" sm="6" md="6">
-                      <v-textarea
-                        label="Comentario CS"  
-                        v-model="mantisFields.CSFollowUpPayment"
-                      ></v-textarea>
-                    </v-col>
-                    <v-col cols="12" sm="6" md="6">
-                      <v-textarea
-                        label="Comentario Finanzas"  
-                        v-model="mantisFields.FinanceFollowUpPayment"
-                      ></v-textarea>
-                    </v-col>
-                  </v-row>
-                </v-container>
-              </v-card-text>
-              <v-card-actions>
-                <v-spacer></v-spacer>
-                <v-btn
-                  color="blue-darken-1"
-                  variant="text"
-                  @click="dialogMantis = false"
-                >
-                  Close
-                </v-btn>
-                <v-btn
-                  color="blue-darken-1"
-                  variant="text"
-                  @click="updateDetails(mantisFields)"
-                >
-                  Save
-                </v-btn>
-              </v-card-actions>
-            </v-card>
-          </v-dialog>
+          <update-mantis-component :invoice="invoice" @update-mantis="refreshInvoice()" />
         </v-card-actions>
         <!-- Cuerpo de la página, detalles de factura -->
         <v-divider class="ma-5"></v-divider>
@@ -277,20 +193,9 @@ import { useAuthStore } from "@/store/auth";
 export default {
   data() {
     return {
-      dialogMantis: false,
       invoice: useInvoiceStore().$state.invoice,
-      employees: [],
-      incidenceCauses: [],
       active_balance: [],
       followups: reactive([]),
-      mantisFields: {
-        EmployeeMantis_id: "",
-        IncidenceCause_id: "",
-        EmployeeBugMantis_id: "",
-        IncidenceDate: "", //yyyy-mm-dd
-        FinanceFollowUpPayment: "",
-        CSFollowUpPayment: ""
-      }
     };
   },
   mounted: async function () {
@@ -311,9 +216,6 @@ export default {
         `/api/followup/${this.invoice.InvoiceId}`,
         options
       );
-      this.employees = await $fetch("/api/employee", options);
-      this.employees = this.employees.filter((e) => e.Status);
-      this.incidenceCauses = await $fetch("/api/incidence_cause", options);
     } catch (error) {
       console.log(error);
     }
@@ -321,31 +223,6 @@ export default {
   methods: {
     roundedBalance: (balance) =>
       Math.round((balance + Number.EPSILON) * 100) / 100,
-    async updateDetails(payload) {
-      const auth = useAuthStore();
-      const invoiceStore = useInvoiceStore();
-      const options = {
-        method: "put",
-        baseURL: auth.$state.baseUrl,
-        headers: {
-          Authorization: `Bearer ${auth.$state.access_token}`,
-        },
-      };
-      options.body = payload;
-      try {
-        let response = await $fetch(
-          `/api/invoice/${this.invoice.InvoiceId}`,
-          options
-        );
-        invoiceStore.fetchInvoice(this.invoice.InvoiceId);
-        this.invoice = response;
-        this.dialog = false;
-        this.dialogMantis = false;
-        console.log(this.invoice)
-      } catch (error) {
-        console.log(error);
-      }
-    },
     async refreshFollowups() {
       const auth = useAuthStore();
       const invoiceStore = useInvoiceStore();
@@ -365,12 +242,11 @@ export default {
         console.log(error)
       }
     },
-    async refeshInvoice() {
+    async refreshInvoice() {
       const invoiceStore = useInvoiceStore;
       try {
         await useInvoiceStore().fetchInvoice(this.invoice.InvoiceId)
         this.invoice = useInvoiceStore().$state.invoice
-        console.log(this.invoice)
       } catch (error) {
         console.log(error)
       }
