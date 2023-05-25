@@ -66,7 +66,6 @@
 
 <script>
 import { useAuthStore } from "@/store/auth";
-import { useInvoiceStore } from "@/store/invoices";
 
 
 export default {
@@ -86,13 +85,7 @@ export default {
   },
   mounted: async function () {
     const auth = useAuthStore();
-    const options = {
-      method: "get",
-      baseURL: auth.$state.baseUrl,
-      headers: {
-        Authorization: `Bearer ${auth.$state.access_token}`,
-      },
-    };
+    const options = auth.defineOptions('GET')
     try {
       this.actions = await $fetch('/api/action', options)
     } catch (error) {
@@ -102,13 +95,7 @@ export default {
   methods: {
     async createNewFollowUp() {
       const auth = useAuthStore()
-      const options = {
-        method:'post',
-        baseURL:auth.$state.baseUrl,
-        headers: {
-          Authorization: `Bearer ${auth.$state.access_token}`
-        }
-      }
+      const options = auth.defineOptions('POST')
       options.body = this.newFollowUp
       console.log(this.invoices)
       this.invoices.forEach(async invoice => {

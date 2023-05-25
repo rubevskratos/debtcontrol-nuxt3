@@ -102,6 +102,15 @@
         <!-- Sección Contacto -->
         <v-container v-if="picklist[1].active" fluid>
           <v-card>
+            <v-card-actions>
+              <v-spacer/>
+              <CreateContactComponent :customer="customer" @create-contact="refreshCustomer()"/>
+            </v-card-actions>
+          </v-card>
+          <ContactsComponent :customer="customer" @delete-contact="refreshCustomer()"/>
+        </v-container>
+        <!-- <v-container v-if="picklist[1].active" fluid>
+          <v-card>
             <v-card-title> CONTACTO </v-card-title>
             <v-divider></v-divider>
             <v-card-text>
@@ -178,7 +187,7 @@
               </v-dialog>
             </v-card-actions>
           </v-card>
-        </v-container>
+        </v-container> -->
         <!-- Sección Histórico -->
         <v-container
           v-if="picklist[2].active"
@@ -410,6 +419,22 @@ export default {
         }
       });
     },
+    async refreshCustomer() {
+      const customerStore = useCustomerStore()
+      try {
+        let response = await customerStore.fetchCustomer(this.customer.CustomerId)
+        this.customer = customerStore.$state.customer
+        this.picklist[1].active=false
+        this.picklist[0].active=true
+        setTimeout(() => {
+          this.picklist[0].active=false
+          this.picklist[1].active=true
+        }, 500);      
+      } catch (error) {
+        console.log(error)
+      }
+
+    }
   },
 };
 </script>

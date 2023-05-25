@@ -147,13 +147,7 @@ export default {
     },
     async getInvoices() {
       const auth = useAuthStore();
-      const options = {
-        method: "GET",
-        baseURL: auth.$state.baseUrl,
-        headers: {
-          Authorization: `Bearer ${auth.$state.access_token}`,
-        },
-      };
+      const options = auth.defineOptions('GET')
 
       try {
         if (this.limit > 0) {
@@ -182,13 +176,7 @@ export default {
   },
   async mounted() {
        const auth = useAuthStore()
-       const options = {
-         method: "GET",
-         baseURL: auth.$state.baseUrl,
-         headers: {
-           Authorization: `Bearer ${auth.$state.access_token}`
-         }
-       }
+       const options = auth.defineOptions('GET')
        const fields = []
        try {
          let invoice = await $fetch("/api/invoice/1", options)

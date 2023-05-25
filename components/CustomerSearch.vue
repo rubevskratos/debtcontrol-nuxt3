@@ -95,13 +95,7 @@ export default {
   },
   mounted: async function () {
     const auth = useAuthStore();
-    const options = {
-      method: "GET",
-      baseURL: auth.$state.baseUrl,
-      headers: {
-        Authorization: `Bearer ${auth.$state.access_token}`,
-      },
-    };
+    const options = auth.defineOptions('GET')
     try {
       let Reps = await $fetch("/api/salesrep", options);
       Reps.filter((rep) => rep.Status).forEach((rep, i) => {
@@ -134,13 +128,7 @@ export default {
     },
     async getCustomers() {
       const auth = useAuthStore();
-      const options = {
-        method: "GET",
-        baseURL: auth.$state.baseUrl,
-        headers: {
-          Authorization: `Bearer ${auth.$state.access_token}`,
-        },
-      };
+      const options = auth.defineOptions('GET')
 
       try {
         if (this.limit > 0) {

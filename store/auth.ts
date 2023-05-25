@@ -5,7 +5,7 @@ export const useAuthStore = defineStore('auth', {
         baseUrl: 'http://localhost:5000',
         user: null,
         access_token: null,
-        refresh_token: null
+        refresh_token: null,
     }),
 
     getters: {
@@ -60,6 +60,16 @@ export const useAuthStore = defineStore('auth', {
         updateToken(token:any | null) {
             this.access_token = token.access_token
             this.refresh_token = token.refresh_token
+        },
+        defineOptions (type:['GET', 'PUT', 'POST', 'DELETE']) {
+            const options = {
+                method: type,
+                baseURL: this.baseUrl,
+                headers: {
+                  Authorization: `Bearer ${this.access_token}`,
+                },
+            }
+            return options
         }
     },
 })
