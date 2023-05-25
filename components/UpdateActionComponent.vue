@@ -33,7 +33,7 @@
                 :items="customer_contacts"
                 item-title="ContactName"
                 item-value="ContactId"
-                v-model="updateFollowUp.CustomerContact_Id"
+                v-model="updateFollowUp.CustomerContact_id"
               >
               </v-select>
             </v-col>

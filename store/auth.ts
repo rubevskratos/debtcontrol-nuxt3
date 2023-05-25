@@ -61,7 +61,7 @@ export const useAuthStore = defineStore('auth', {
             this.access_token = token.access_token
             this.refresh_token = token.refresh_token
         },
-        defineOptions (type:['GET', 'PUT', 'POST', 'DELETE']) {
+        defineOptions (type:"GET" | "PATCH" | "PUT" | "DELETE") {
             const options = {
                 method: type,
                 baseURL: this.baseUrl,

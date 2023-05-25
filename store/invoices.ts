@@ -3,7 +3,8 @@ import { useAuthStore } from "./auth";
 
 export const useInvoiceStore = defineStore("invoice", {
   state: () => ({
-    invoice: {}
+    invoice: {},
+    active_balance: []
   }),
   getters: {
     getInvoice: (state) => {
@@ -13,14 +14,10 @@ export const useInvoiceStore = defineStore("invoice", {
   actions: {
     async fetchInvoice(invoiceId:string) {
       const auth = useAuthStore();
+      const options = auth.defineOptions("GET")
+
       try {
-        let invoice = await $fetch(`/api/invoice/${invoiceId}`, {
-          method: "get",
-          baseURL: auth.$state.baseUrl,
-          headers: {
-            Authorization: `Bearer ${auth.$state.access_token}`,
-          }
-        })
+        let invoice = await $fetch(`/api/invoice/${invoiceId}`, options)
         if (invoice) {
           this.updateInvoiceStore(invoice)
         }
@@ -28,8 +25,23 @@ export const useInvoiceStore = defineStore("invoice", {
         console.log(error);
       }
     },
+    async fetchInvoiceBalance(invoiceId:string) {
+      const auth = useAuthStore()
+      const options = auth.defineOptions("GET")
+
+      try {
+        let response = await $fetch(`/api/active_balance/${invoiceId}`, options)
+        this.updateActiveBalance(response)
+      } catch (error) {
+        console.log(error)
+      }
+
+    },
     updateInvoiceStore(invoice: object) {
       this.invoice = invoice;
     },
+    updateActiveBalance(active_balance: any) {
+      this.active_balance = active_balance
+    }
   },
 });
