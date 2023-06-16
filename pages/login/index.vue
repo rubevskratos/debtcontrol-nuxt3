@@ -75,6 +75,10 @@ export default {
         console.log(error);
       }
     },
+    isLoggedIn () {
+      const auth = useAuthStore()
+      return auth.isLoggedIn
+    }
   },
 };
 </script>
