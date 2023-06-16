@@ -1,15 +1,40 @@
 import { defineStore } from 'pinia'
+import { useRouter } from 'vue-router'
+import Cookies from 'js-cookie'
+
+interface User {
+  // Define las propiedades de tu objeto de usuario aquí
+}
+
+interface Token {
+  access_token: string;
+  refresh_token: string;
+}
 
 export const useAuthStore = defineStore('auth', {
     state: () => ({
         baseUrl: 'http://localhost:5000',
-        user: null,
-        access_token: null,
-        refresh_token: null,
+        user: null as User | null,
+        access_token: null as string | null,
+        refresh_token: null as string | null,
     }),
 
     getters: {
-        isLoggedIn: (state) => !!state.user
+        isLoggedIn(): boolean {
+            if (this.user) {
+                return true;
+            }
+            const user = Cookies.get('user');
+            const access_token = Cookies.get('access_token');
+            const refresh_token = Cookies.get('refresh_token');
+            if (user && access_token && refresh_token) {
+                this.user = JSON.parse(user);
+                this.access_token = access_token;
+                this.refresh_token = refresh_token;
+                return true;
+            }
+            return false;
+        }
     },
 
     actions: {
@@ -19,52 +44,68 @@ export const useAuthStore = defineStore('auth', {
             let router = useRouter()
 
             if (!user) {
-                const response = await $fetch('/api/user',{
+                const response = await fetch(`${this.baseUrl}/api/user`,{
                     method:'GET',
-                    baseURL: this.baseUrl,
                     headers: {
                         Authorization: `Bearer ${token}`
                     }
                 })
                 
-                this.updateUser(response)
+                const data = await response.json();
+                this.updateUser(data)
                 router.push({name:'index'})
             }
         },
 
-        async login (payload:Object) {
+        async login (payload: Object) {
             try {
-                let response = await $fetch('/api/login', {
+                const response = await fetch(`${this.baseUrl}/api/login`, {
                     method: 'POST',
-                    baseURL: this.baseUrl,
-                    body: payload
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
                 })
-                this.updateToken(response)
+                const data: Token = await response.json();
+                this.updateToken(data)
                 this.initAuth()
             } catch (error) {
                 console.log(error)
             }
         },
 
-        async register (payload:any) {
+        async register (payload: any) {
             // some register logic
         },
 
         async logOut() {
+            Cookies.remove('user');
+            Cookies.remove('access_token');
+            Cookies.remove('refresh_token');
             this.updateUser(null)
+            this.updateToken(null)
         },
 
-        updateUser(payload:any) {
+        updateUser(payload: User | null) {
             this.user = payload
+            if (payload) {
+                Cookies.set('user', JSON.stringify(payload));
+            }
         },
-        updateToken(token:any | null) {
-            this.access_token = token.access_token
-            this.refresh_token = token.refresh_token
+        updateToken(token: Token | null) {
+            if (token) {
+                this.access_token = token.access_token
+                this.refresh_token = token.refresh_token
+                Cookies.set('access_token', token.access_token);
+                Cookies.set('refresh_token', token.refresh_token);
+            } else {
+                this.access_token = null
+                this.refresh_token = null
+            }
         },
-        defineOptions (type:"GET" | "PATCH" | "PUT" | "DELETE") {
+        defineOptions (type: "GET" | "PATCH" | "PUT" | "DELETE") {
             const options = {
                 method: type,
-                baseURL: this.baseUrl,
                 headers: {
                   Authorization: `Bearer ${this.access_token}`,
                 },
