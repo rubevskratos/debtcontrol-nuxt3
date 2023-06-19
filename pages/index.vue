@@ -12,12 +12,12 @@
       </v-col>
     </v-row>
   </template>
-  
-  <script>
+  <script setup>
   definePageMeta({
     middleware: ['auth']
   })
-
+  </script>
+  <script>
   export default {
     data() {
       return {

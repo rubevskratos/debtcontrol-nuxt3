@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import Cookies from 'js-cookie'
+import { routerKey } from 'vue-router';
 
 interface User {
   // Define las propiedades de tu objeto de usuario aquí
@@ -16,8 +17,8 @@ export const useAuthStore = defineStore('auth', {
         user: null as User | null,
         access_token: null as string | null,
         refresh_token: null as string | null,
+        loggedIn: ref(false)
     }),
-
     getters: {
         isLoggedIn(): boolean {
             if (this.user) {
@@ -33,9 +34,8 @@ export const useAuthStore = defineStore('auth', {
                 return true;
             }
             return false;
-        }
+        },
     },
-
     actions: {
         async initAuth() {
             let user = this.user
@@ -55,7 +55,6 @@ export const useAuthStore = defineStore('auth', {
                 router.push({name:'index'})
             }
         },
-
         async login (payload: Object) {
             try {
                 const response = await fetch(`${this.baseUrl}/api/login`, {
