@@ -1,80 +1,107 @@
-// Código del store de Pinia
 import { defineStore } from 'pinia'
 import Cookies from 'js-cookie'
-import { useRouter } from 'vue-router'
+import { routerKey } from 'vue-router';
 
 interface User {
   // Define las propiedades de tu objeto de usuario aquí
 }
 
+interface Token {
+  access_token: string;
+  refresh_token: string;
+}
+
 export const useAuthStore = defineStore('auth', {
-  state: () => ({
-    baseUrl: 'http://localhost:5000',
-    user: null as User | null,
-    loggedIn: false,
-  }),
-  getters: {
-    isLoggedIn(): boolean {
-      return this.loggedIn;
-    },
-  },
-  actions: {
-    async initAuth() {
-      const user = this.user
-      const token = Cookies.get('access_token')
-
-      if (user && token) {
-        try {
-          const response = await fetch(`${this.baseUrl}/api/user`, {
-            method: 'GET',
-            headers: {
-              Authorization: `Bearer ${token}`
+    state: () => ({
+        baseUrl: 'http://localhost:5000',
+        user: Cookies.get('user') as User | null,
+        access_token: Cookies.get('access_token') as string | null,
+        refresh_token: Cookies.get('refresh_token') as string | null,
+        loggedIn: ref(false)
+    }),
+    getters: {
+        isLoggedIn(): boolean {
+            if (this.user && this.access_token && this.refresh_token) {
+                return true;
             }
-          })
-
-          if (response.ok) {
-            const data = await response.json();
-            this.updateUser(data)
-            this.loggedIn = true;
-          } else {
-            await this.logOut();
-          }
-        } catch (error) {
-          console.log(error)
-          await this.logOut();
-        }
-      }
+            return false;
+        },
     },
-    async login(payload: Object) {
-      try {
-        const response = await fetch(`${this.baseUrl}/api/login`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
+    actions: {
+        async initAuth() {
+            let user = this.user
+            let token = this.access_token
+            let router = useRouter()
+          
+            if (!user && token) { // Asegúrate de que hay un token de acceso antes de hacer la solicitud
+              const response = await fetch(`${this.baseUrl}/api/user`,{
+                method:'GET',
+                headers: {
+                  Authorization: `Bearer ${token}`
+                }
+              })
+              
+              const data = await response.json();
+              this.updateUser(data)
+              if (this.user && this) {
+                router.push('/')
+              }
+            }
           },
-          body: JSON.stringify(payload)
-        })
+        async login (payload: Object) {
+            try {
+                const response = await fetch(`${this.baseUrl}/api/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                })
+                const data: Token = await response.json();
+                this.updateToken(data)
+                await this.initAuth()
+            } catch (error) {
+                console.log(error)
+            }
+        },
 
-        if (response.ok) {
-          const data = await response.json();
-          this.updateUser(data)
-          this.loggedIn = true;
-          Cookies.set('user', JSON.stringify(data));
-        } else {
-          console.log('Error al iniciar sesión');
+        async register (payload: any) {
+            // some register logic
+        },
+
+        async logOut() {
+            Cookies.remove('user');
+            Cookies.remove('access_token');
+            Cookies.remove('refresh_token');
+            this.updateUser(null)
+            this.updateToken(null)
+        },
+
+        updateUser(payload: User | null) {
+            this.user = payload
+            if (payload) {
+                Cookies.set('user', JSON.stringify(payload));
+            }
+        },
+        updateToken(token: Token | null) {
+            if (token) {
+                this.access_token = token.access_token
+                this.refresh_token = token.refresh_token
+                Cookies.set('access_token', token.access_token);
+                Cookies.set('refresh_token', token.refresh_token);
+            } else {
+                this.access_token = null
+                this.refresh_token = null
+            }
+        },
+        defineOptions (type: "GET" | "PATCH" | "PUT" | "DELETE") {
+            const options = {
+                method: type,
+                headers: {
+                  Authorization: `Bearer ${this.access_token}`,
+                },
+            }
+            return options
         }
-      } catch (error) {
-        console.log(error)
-      }
     },
-    async logOut() {
-      Cookies.remove('user');
-      this.updateUser(null);
-      this.loggedIn = false;
-    },
-    updateUser(payload: User | null) {
-      this.user = payload;
-    },
-    // Resto de acciones...
-  },
 })
