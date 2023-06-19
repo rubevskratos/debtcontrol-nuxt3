@@ -14,6 +14,9 @@
 import { useAuthStore  } from '@/store/auth';
 
 export default {
+  beforeMount() {
+    this.isLoggedIn()
+  },
   methods: {
     isLoggedIn () {
       const auth = useAuthStore()
