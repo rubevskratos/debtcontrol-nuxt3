@@ -70,7 +70,7 @@ export default {
     async userLogin() {
       const auth = useAuthStore()
       try {
-        let response = await auth.login(this.login);
+        await auth.login(this.login);
       } catch (error) {
         console.log(error);
       }

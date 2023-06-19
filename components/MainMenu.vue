@@ -28,7 +28,7 @@ export default {
          const auth = useAuthStore()
          
          try {
-             let response = await auth.logOut()
+             await auth.logOut()
              this.$router.push('/login')
          } catch (error) {
              console.log(error)

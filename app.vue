@@ -10,23 +10,15 @@
   </v-app>
 </template>
 
-<script>  
-import { useAuthStore  } from '@/store/auth';
+<script setup>
+import { useAuthStore } from '@/store/auth';
+import { useFetch } from '#app';
 
-export default {
-  data() {
-    return reactive({
-      isLoggedIn: false
-    })
-  },
-  mounted() {
-    this.checkLogin()
-  },
-  methods: {
-    checkLogin () {
-      const auth = useAuthStore()
-      this.isLoggedIn = auth.isLoggedIn
-    }
-  }
-}
+const auth = useAuthStore();
+
+useFetch(async () => {
+  await auth.initAuth();
+});
+
+const isLoggedIn = computed(() => auth.isLoggedIn);
 </script>
