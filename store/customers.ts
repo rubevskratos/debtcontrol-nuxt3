@@ -4,12 +4,14 @@ import { useAuthStore } from "./auth";
 type Customer = any; // Actualiza esto con la estructura de tus datos
 type SalesRep = any; // Actualiza esto con la estructura de tus datos
 type PayPlans = any; // Actualiza esto con la estructura de tus datos
+type InvPayPlans = any;
 
 export const useCustomerStore = defineStore("customer", {
   state: () => ({
     customer: {} as Customer,
     salesRep: {} as SalesRep,
-    payplans: {} as PayPlans
+    payplans: {} as PayPlans,
+    invpayplans: [] as InvPayPlans
   }),
   getters: {
     getCustomer: (state) => state.customer,
@@ -50,5 +52,12 @@ export const useCustomerStore = defineStore("customer", {
         this.payplans = payplans;
       }
     },
+    async fetchInvPayPlans(PayPlanId: string) {
+      let invpayplan: InvPayPlans = await this.fetchData('invpayplan', PayPlanId);
+      if (invpayplan) {
+        this.invpayplans = invpayplan
+        return this.invpayplans
+      }
+    }
   },
 });
