@@ -103,11 +103,17 @@
         <v-container v-if="picklist[1].active" fluid>
           <v-card>
             <v-card-actions>
-              <v-spacer/>
-              <CreateContactComponent :customer="customer" @create-contact="refreshCustomer()"/>
+              <v-spacer />
+              <CreateContactComponent
+                :customer="customer"
+                @create-contact="refreshCustomer()"
+              />
             </v-card-actions>
           </v-card>
-          <ContactsComponent :customer="customer" @delete-contact="refreshCustomer()"/>
+          <ContactsComponent
+            :customer="customer"
+            @delete-contact="refreshCustomer()"
+          />
         </v-container>
         <!-- <v-container v-if="picklist[1].active" fluid>
           <v-card>
@@ -251,18 +257,28 @@
             <v-card-text> No invoice history found. </v-card-text>
           </v-card>
         </v-container>
+        <v-container
+          v-if="picklist[4].active"
+          fluid
+          class="overflow-auto"
+          style="max-height: 90vh"
+        >
+        <AddCommitmentComponent v-if="!payplans"/>
+        <CommitmentsComponent v-else :payplans="payplans"/>
+        </v-container>
       </v-sheet>
     </v-col>
   </v-row>
 </template>
 
-<script>
-import { useCustomerStore } from "@/store/customers";
-import { useAuthStore } from "@/store/auth";
-
+<script setup>
 definePageMeta({
   middleware: ["auth"],
 });
+</script>
+<script>
+import { useCustomerStore } from "@/store/customers";
+import { useAuthStore } from "@/store/auth";
 
 export default {
   data() {
@@ -276,6 +292,7 @@ export default {
         { name: "Planes de Pago", active: false },
       ],
       customer: useCustomerStore().$state.customer,
+      payplans: null,
       invoiceHistory: [],
       invoiceActions: [],
       selectedInvoices: [],
@@ -296,6 +313,10 @@ export default {
         limit: 10,
       },
     };
+  },
+  mounted() {
+    const CustomerStore = useCustomerStore()
+    this.payplans = CustomerStore.$state.payplans
   },
   methods: {
     updatePagination(type) {
@@ -420,21 +441,22 @@ export default {
       });
     },
     async refreshCustomer() {
-      const customerStore = useCustomerStore()
+      const customerStore = useCustomerStore();
       try {
-        let response = await customerStore.fetchCustomer(this.customer.CustomerId)
-        this.customer = customerStore.$state.customer
-        this.picklist[1].active=false
-        this.picklist[0].active=true
+        let response = await customerStore.fetchCustomer(
+          this.customer.CustomerId
+        );
+        this.customer = customerStore.$state.customer;
+        this.picklist[1].active = false;
+        this.picklist[0].active = true;
         setTimeout(() => {
-          this.picklist[0].active=false
-          this.picklist[1].active=true
-        }, 500);      
+          this.picklist[0].active = false;
+          this.picklist[1].active = true;
+        }, 500);
       } catch (error) {
-        console.log(error)
+        console.log(error);
       }
-
-    }
+    },
   },
 };
 </script>

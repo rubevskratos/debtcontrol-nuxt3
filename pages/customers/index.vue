@@ -20,12 +20,13 @@
   </v-container>
 </template>
 
-<script>
-import { useCustomerStore } from "@/store/customers";
-
+<script setup>
 definePageMeta({
   middleware: ["auth"],
 });
+</script>
+<script>
+import { useCustomerStore } from "@/store/customers";
 
 export default {
   data() {

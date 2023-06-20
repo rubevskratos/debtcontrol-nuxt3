@@ -1,55 +1,54 @@
 import { defineStore } from "pinia";
 import { useAuthStore } from "./auth";
 
+type Customer = any; // Actualiza esto con la estructura de tus datos
+type SalesRep = any; // Actualiza esto con la estructura de tus datos
+type PayPlans = any; // Actualiza esto con la estructura de tus datos
+
 export const useCustomerStore = defineStore("customer", {
   state: () => ({
-    customer: {},
-    salesRep: {}
+    customer: {} as Customer,
+    salesRep: {} as SalesRep,
+    payplans: {} as PayPlans
   }),
   getters: {
     getCustomer: (state) => state.customer,
     getSalesRep: (state) => state.salesRep
   },
   actions: {
-    async fetchCustomer(customerId:string) {
+    async fetchData(endpoint: string, id: string) {
       const auth = useAuthStore();
       try {
-        let customer = await $fetch(`/api/customer/${customerId}`, {
+        return await $fetch(`/api/${endpoint}/${id}`, {
           method: "get",
           baseURL: auth.$state.baseUrl,
           headers: {
             Authorization: `Bearer ${auth.$state.access_token}`,
           }
-        })
-        if (customer) {
-          this.updateCustomerStore(customer)
-        }
+        });
       } catch (error) {
         console.log(error);
+        return null;
       }
     },
-    async fetchSalesRep(SalesRepId:string) {
-      const auth = useAuthStore();
-      try {
-        let salesrep = await $fetch(`/api/salesrep/${SalesRepId}`, {
-          method: "get",
-          baseURL: auth.$state.baseUrl,
-          headers: {
-            Authorization: `Bearer ${auth.$state.access_token}`,
-          }
-        })
-        if (salesrep) {
-          this.updateSalesRepStore(salesrep)
-        }
-      } catch (error) {
-        console.log(error)
+    async fetchCustomer(customerId: string) {
+      let customer: Customer = await this.fetchData('customer', customerId);
+      if (customer) {
+        this.customer = customer;
+        await this.fetchPayPlans(this.customer.CustomerId);
       }
     },
-    updateCustomerStore(customer: object) {
-      this.customer = customer;
+    async fetchSalesRep(SalesRepId: string) {
+      let salesrep: SalesRep = await this.fetchData('salesrep', SalesRepId);
+      if (salesrep) {
+        this.salesRep = salesrep;
+      }
     },
-    updateSalesRepStore(salesrep:object) {
-      this.salesRep = salesrep
-    }
+    async fetchPayPlans(CustomerId: string) {
+      let payplans: PayPlans = await this.fetchData('payplan', CustomerId);
+      if (payplans) {
+        this.payplans = payplans;
+      }
+    },
   },
 });

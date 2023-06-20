@@ -20,13 +20,13 @@
     </v-container>
   </template>
   
-  <script>
-  import { useInvoiceStore } from "@/store/invoices";
-  
+  <script setup>
   definePageMeta({
     middleware: ["auth"],
   });
-  
+  </script>
+  <script>
+  import { useInvoiceStore } from "@/store/invoices";
   export default {
     data() {
       return {

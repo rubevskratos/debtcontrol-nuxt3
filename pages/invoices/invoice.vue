@@ -153,6 +153,11 @@
   </v-row>
 </template>
 
+<script setup>
+definePageMeta({
+  middleware: ["auth"],
+});
+</script>
 <script>
 import { useInvoiceStore } from "@/store/invoices";
 import { useAuthStore } from "@/store/auth";
@@ -171,8 +176,8 @@ export default {
     const invoiceStore = useInvoiceStore()
     try {
       let invoice = invoiceStore.$state.invoice
-      let response = await customerStore.fetchCustomer(invoice.customer.CustomerId)
-      let fetchInvoiceBalance = await invoiceStore.fetchInvoiceBalance(invoice.InvoiceId)
+      await customerStore.fetchCustomer(invoice.customer.CustomerId)
+      await invoiceStore.fetchInvoiceBalance(invoice.InvoiceId)
     } catch (error) {
       console.log(error)
     }

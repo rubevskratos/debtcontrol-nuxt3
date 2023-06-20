@@ -69,6 +69,11 @@
   </v-container>
 </template>
 
+<script setup>
+definePageMeta({
+  middleware: ["auth"],
+});
+</script>
 <script>
 import { useAuthStore } from '@/store/auth'
 
