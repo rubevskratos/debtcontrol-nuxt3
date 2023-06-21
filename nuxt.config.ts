@@ -20,6 +20,15 @@ export default defineNuxtConfig({
       noExternal: ["vuetify"],
     },
   },
+  components: [
+    { path: '~/components/customers', extensions: ['vue'] },
+    { path: '~/components/contacts', extensions: ['vue'] },
+    { path: '~/components/followups', extensions: ['vue'] },
+    { path: '~/components/payplan', extensions: ['vue'] },
+    { path: '~/components/invoices', extensions: ['vue'] },
+    { path: '~/components/main', extensions: ['vue'] },
+    { path: '~/components/apexcharts', extensions: ['vue'] }
+  ],
   modules: [
     "@pinia/nuxt",
     async (options, nuxt) => {

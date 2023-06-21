@@ -263,6 +263,7 @@
           class="overflow-auto"
           style="max-height: 90vh"
         >
+        <ProgressChart />
         <AddCommitmentComponent v-if="!payplans"/>
         <CommitmentsComponent v-else :payplans="payplans"/>
         </v-container>
@@ -293,6 +294,7 @@ export default {
       ],
       customer: useCustomerStore().$state.customer,
       payplans: null,
+      payplanstatus: null,
       invoiceHistory: [],
       invoiceActions: [],
       selectedInvoices: [],
