@@ -1,6 +1,6 @@
 <template>
   <v-card v-for="(commitment, i) in payplans" key="i">
-    <v-card-title> Plan de Pagos </v-card-title>
+    <v-card-title> Factura: {{  }} </v-card-title>
     <v-card-text>
       <v-row cols="12">
         <v-col cols="10">
@@ -36,11 +36,14 @@
 </template>
 
 <script setup>
+import { useInvoiceStore } from '~/store/invoices';
 import InvCommitmentsComponent from './InvCommitmentsComponent.vue';
 
 const props = defineProps({
   payplans: Object
 })
+
+const invoice = useInvoiceStore()
 </script>
 
 <style lang="scss" scoped></style>
