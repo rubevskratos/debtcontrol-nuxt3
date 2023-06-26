@@ -12,17 +12,26 @@
             <v-card-text>
                 <v-form>
                     <v-row cols="12">
-                        <v-col cols="12">
-                            
-                        </v-col>
-                        <v-col cols="2">
+                        <v-col cols="1">
                             <v-checkbox label="Burofax" v-model="invoice.Burofax"></v-checkbox>
                         </v-col>
-                        <v-col cols="2">
-                            <v-checkbox label="Monitoring" v-model="invoice.Monitoring"></v-checkbox>
+                        <v-col cols="1">
+                            <v-checkbox label="Monitor" v-model="invoice.Monitoring"></v-checkbox>
                         </v-col>
                         <v-col cols="2">
-                            <v-checkbox label="Paid" v-model="invoice.Paid"></v-checkbox>
+                            <v-checkbox label="Pagado" v-model="invoice.Paid"></v-checkbox>
+                        </v-col>
+                        <v-col cols="2">
+                            <v-text-field label="Fecha de Vencimiento" v-model="invoice.DueDate"></v-text-field>
+                        </v-col>
+                        <v-col cols="2">
+                            <v-text-field label="Fecha de Pago" v-model="invoice.PaidDay"></v-text-field>
+                        </v-col>
+                        <v-col cols="2">
+                            <v-text-field label="Comentarios" v-model="invoice.Comments" />
+                        </v-col>
+                        <v-col cols="2">
+                          <v-btn><v-icon>mdi-pencil-outline</v-icon></v-btn>
                         </v-col>
                     </v-row>
                 </v-form>
