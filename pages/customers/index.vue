@@ -75,8 +75,10 @@ export default {
     async getCustomer(customer) {
       let id = toRaw(customer);
       const customerStore = useCustomerStore();
+      customerStore.flushStore()
+
       try {
-        let response = await customerStore.fetchCustomer(id.CustomerId);
+        await customerStore.fetchCustomer(id.CustomerId);
         this.$router.push({ name: "customers-customer" });
       } catch (error) {
         console.log(error);

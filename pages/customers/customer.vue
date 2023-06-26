@@ -263,9 +263,20 @@
           class="overflow-auto"
           style="max-height: 90vh"
         >
-        <ProgressChart />
-        <AddCommitmentComponent v-if="!payplans"/>
-        <CommitmentsComponent v-else :payplans="payplans"/>
+        <v-card v-if="payplans.length === 0">
+          <v-card-text>
+            Este cliente aún no tiene ningún plan de pagos.
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <AddCommitmentComponent/>
+            <v-spacer></v-spacer>
+          </v-card-actions>
+        </v-card>
+        <v-card v-else>
+          <ProgressChart :progress="payplanstatus.series[0] * 100" :label="payplanstatus.labels[0]" />
+          <CommitmentsComponent :payplans="payplans"/>
+        </v-card>
         </v-container>
       </v-sheet>
     </v-col>
@@ -282,184 +293,186 @@ import { useCustomerStore } from "@/store/customers";
 import { useAuthStore } from "@/store/auth";
 
 export default {
-  data() {
-    return {
-      dialog: false,
-      picklist: [
-        { name: "Cuenta", active: true },
-        { name: "Contacto", active: false },
-        { name: "Historial de Facturas", active: false },
-        { name: "Facturas Activas", active: false },
-        { name: "Planes de Pago", active: false },
-      ],
-      customer: useCustomerStore().$state.customer,
-      payplans: null,
-      payplanstatus: null,
-      invoiceHistory: [],
-      invoiceActions: [],
-      selectedInvoices: [],
-      inputData: {
-        DebtDistribution: useCustomerStore().$state.customer.DebtDistribution,
-        ClientNotes: useCustomerStore().$state.customer.ClientNotes,
-        Department: useCustomerStore().$state.customer.Department,
-        EmailContact: useCustomerStore().$state.customer.EmailContact,
-        Phone: useCustomerStore().$state.customer.Phone,
-        ContactName: useCustomerStore().$state.customer.ContactName,
-        AdministrativePhone:
-          useCustomerStore().$state.customer.AdministrativePhone,
-      },
-      pageList: [],
-      pagination: {
-        length: 0,
-        page: 1,
-        limit: 10,
-      },
-    };
-  },
-  mounted() {
-    const CustomerStore = useCustomerStore()
-    this.payplans = CustomerStore.$state.payplans
-  },
-  methods: {
-    updatePagination(type) {
-      if (type === "history") {
-        this.invoiceHistory.splice(0);
-        this.getInvoices(type);
-      } else {
-        this.invoiceActions.splice(0);
-        this.getInvoices(type);
-      }
+    data() {
+        return {
+            dialog: false,
+            picklist: [
+                { name: "Cuenta", active: true },
+                { name: "Contacto", active: false },
+                { name: "Historial de Facturas", active: false },
+                { name: "Facturas Activas", active: false },
+                { name: "Planes de Pago", active: false },
+            ],
+            customer: useCustomerStore().$state.customer,
+            payplans: null,
+            payplanstatus: null,
+            invoiceHistory: [],
+            invoiceActions: [],
+            selectedInvoices: [],
+            inputData: {
+                DebtDistribution: useCustomerStore().$state.customer.DebtDistribution,
+                ClientNotes: useCustomerStore().$state.customer.ClientNotes,
+                Department: useCustomerStore().$state.customer.Department,
+                EmailContact: useCustomerStore().$state.customer.EmailContact,
+                Phone: useCustomerStore().$state.customer.Phone,
+                ContactName: useCustomerStore().$state.customer.ContactName,
+                AdministrativePhone: useCustomerStore().$state.customer.AdministrativePhone,
+            },
+            pageList: [],
+            pagination: {
+                length: 0,
+                page: 1,
+                limit: 10,
+            },
+        };
     },
-    updateSheet(i) {
-      this.picklist.forEach((e) => (e.active = false));
-      this.picklist[i].active = true;
-      this.pagination.page = 1;
-      this.pagination.length = 0;
-      if (this.picklist[2].active) {
-        this.getInvoices("history");
-      } else if (this.picklist[3].active) {
-        this.getInvoices("actions");
-      }
-    },
-    async updateCustomer() {
-      // Nos quedamos únicamente con los parámetros que contengan datos
-      const body = {};
-      for (const key in this.inputData) {
-        if (this.inputData[key]) {
-          body[key] = this.inputData[key];
+    mounted() {
+        const CustomerStore = useCustomerStore();
+        this.payplans = CustomerStore.$state.payplans;
+        if (CustomerStore.$state.payplans.length > 0) {
+          CustomerStore.fetchPayPlanStatus(CustomerStore.$state.payplans)
+          this.payplanstatus = CustomerStore.$state.payplanStatus
         }
-      }
-      // Iniciamos la instancia de usuario
-      const auth = useAuthStore();
-      const customer = useCustomerStore();
-      const options = {
-        method: "put",
-        baseURL: auth.$state.baseUrl,
-        headers: {
-          Authorization: `Bearer ${auth.$state.access_token}`,
+    },
+    methods: {
+        updatePagination(type) {
+            if (type === "history") {
+                this.invoiceHistory.splice(0);
+                this.getInvoices(type);
+            }
+            else {
+                this.invoiceActions.splice(0);
+                this.getInvoices(type);
+            }
         },
-      };
-      options.body = body;
-      const endpoint = `/api/customer/${this.customer.CustomerId}`;
-      try {
-        let response = await $fetch(endpoint, options);
-        this.customer = response;
-        customer.fetchCustomer(response.CustomerId);
-        this.dialog = false;
-      } catch (error) {
-        console.log(error);
-      }
-    },
-    today() {
-      const date = new Date();
-      const dateText = date.toJSON();
-      const day = dateText.split("-")[2].split("T")[0];
-      const month = dateText.split("-")[1];
-      const year = dateText.split("-")[0];
-      const today = `${year}-${month}-${day}`;
-      return today;
-    },
-    initialDate() {
-      const date = new Date();
-      date.setYear(1900 + (date.getYear() - 5));
-      const dateText = date.toJSON();
-      const day = dateText.split("-")[2].split("T")[0];
-      const month = dateText.split("-")[1];
-      const year = dateText.split("-")[0];
-      const initialDate = `${year}-${month}-${day}`;
-      return initialDate;
-    },
-    async getInvoices(type) {
-      const auth = useAuthStore();
-      const options = {
-        method: "get",
-        baseURL: auth.$state.baseUrl,
-        headers: {
-          Authorization: `Bearer ${auth.$state.access_token}`,
+        updateSheet(i) {
+            this.picklist.forEach((e) => (e.active = false));
+            this.picklist[i].active = true;
+            this.pagination.page = 1;
+            this.pagination.length = 0;
+            if (this.picklist[2].active) {
+                this.getInvoices("history");
+            }
+            else if (this.picklist[3].active) {
+                this.getInvoices("actions");
+            }
         },
-      };
-
-      const params = {
-        Active: false,
-        CustomerCode: this.customer.CustomerCode,
-        FromInvoiceDate: this.initialDate(),
-        ToInvoiceDate: this.today(),
-      };
-
-      options.params = params;
-
-      if (type === "actions") {
-        options.params.Active = true;
-      }
-      try {
-        let invoices = await $fetch("/api/invoice", options);
-        //Redondeamos el balance
-        invoices.forEach((invoice, i) => {
-          invoices[i].Balance = this.roundedBalance(invoice.Balance);
-        });
-        this.showResults(invoices, type);
-      } catch (error) {
-        console.log(error);
-      }
-    },
-    roundedBalance: (balance) =>
-      Math.round((balance + Number.EPSILON) * 100) / 100,
-    showResults(invoiceList, type) {
-      let totalLength = invoiceList.length;
-      this.pagination.length = Math.ceil(totalLength / this.pagination.limit);
-      let currentIndex = this.pagination.limit * (this.pagination.page - 1);
-      let currentLimit = currentIndex + this.pagination.limit;
-      let x = 0;
-
-      invoiceList.forEach((invoice, i) => {
-        if (i >= currentIndex && i < currentLimit) {
-          if (type === "history") {
-            this.invoiceHistory[x] = invoiceList[i];
-          } else if (type === "actions") {
-            this.invoiceActions[x] = invoiceList[i];
-          }
-          x++;
-        }
-      });
-    },
-    async refreshCustomer() {
-      const customerStore = useCustomerStore();
-      try {
-        let response = await customerStore.fetchCustomer(
-          this.customer.CustomerId
-        );
-        this.customer = customerStore.$state.customer;
-        this.picklist[1].active = false;
-        this.picklist[0].active = true;
-        setTimeout(() => {
-          this.picklist[0].active = false;
-          this.picklist[1].active = true;
-        }, 500);
-      } catch (error) {
-        console.log(error);
-      }
-    },
-  },
+        async updateCustomer() {
+            // Nos quedamos únicamente con los parámetros que contengan datos
+            const body = {};
+            for (const key in this.inputData) {
+                if (this.inputData[key]) {
+                    body[key] = this.inputData[key];
+                }
+            }
+            // Iniciamos la instancia de usuario
+            const auth = useAuthStore();
+            const customer = useCustomerStore();
+            const options = {
+                method: "put",
+                baseURL: auth.$state.baseUrl,
+                headers: {
+                    Authorization: `Bearer ${auth.$state.access_token}`,
+                },
+            };
+            options.body = body;
+            const endpoint = `/api/customer/${this.customer.CustomerId}`;
+            try {
+                let response = await $fetch(endpoint, options);
+                this.customer = response;
+                customer.fetchCustomer(response.CustomerId);
+                this.dialog = false;
+            }
+            catch (error) {
+                console.log(error);
+            }
+        },
+        today() {
+            const date = new Date();
+            const dateText = date.toJSON();
+            const day = dateText.split("-")[2].split("T")[0];
+            const month = dateText.split("-")[1];
+            const year = dateText.split("-")[0];
+            const today = `${year}-${month}-${day}`;
+            return today;
+        },
+        initialDate() {
+            const date = new Date();
+            date.setYear(1900 + (date.getYear() - 5));
+            const dateText = date.toJSON();
+            const day = dateText.split("-")[2].split("T")[0];
+            const month = dateText.split("-")[1];
+            const year = dateText.split("-")[0];
+            const initialDate = `${year}-${month}-${day}`;
+            return initialDate;
+        },
+        async getInvoices(type) {
+            const auth = useAuthStore();
+            const options = {
+                method: "get",
+                baseURL: auth.$state.baseUrl,
+                headers: {
+                    Authorization: `Bearer ${auth.$state.access_token}`,
+                },
+            };
+            const params = {
+                Active: false,
+                CustomerCode: this.customer.CustomerCode,
+                FromInvoiceDate: this.initialDate(),
+                ToInvoiceDate: this.today(),
+            };
+            options.params = params;
+            if (type === "actions") {
+                options.params.Active = true;
+            }
+            try {
+                let invoices = await $fetch("/api/invoice", options);
+                //Redondeamos el balance
+                invoices.forEach((invoice, i) => {
+                    invoices[i].Balance = this.roundedBalance(invoice.Balance);
+                });
+                this.showResults(invoices, type);
+            }
+            catch (error) {
+                console.log(error);
+            }
+        },
+        roundedBalance: (balance) => Math.round((balance + Number.EPSILON) * 100) / 100,
+        showResults(invoiceList, type) {
+            let totalLength = invoiceList.length;
+            this.pagination.length = Math.ceil(totalLength / this.pagination.limit);
+            let currentIndex = this.pagination.limit * (this.pagination.page - 1);
+            let currentLimit = currentIndex + this.pagination.limit;
+            let x = 0;
+            invoiceList.forEach((invoice, i) => {
+                if (i >= currentIndex && i < currentLimit) {
+                    if (type === "history") {
+                        this.invoiceHistory[x] = invoiceList[i];
+                    }
+                    else if (type === "actions") {
+                        this.invoiceActions[x] = invoiceList[i];
+                    }
+                    x++;
+                }
+            });
+        },
+        async refreshCustomer() {
+            const customerStore = useCustomerStore();
+            try {
+                let response = await customerStore.fetchCustomer(this.customer.CustomerId);
+                this.customer = customerStore.$state.customer;
+                this.picklist[1].active = false;
+                this.picklist[0].active = true;
+                setTimeout(() => {
+                    this.picklist[0].active = false;
+                    this.picklist[1].active = true;
+                }, 500);
+            }
+            catch (error) {
+                console.log(error);
+            }
+        },
+    }
 };
 </script>
 

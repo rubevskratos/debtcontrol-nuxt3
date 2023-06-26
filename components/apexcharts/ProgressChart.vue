@@ -1,24 +1,30 @@
 <template>
-  <client-only>
+  <v-row cols="12">
     <apexchart
       type="radialBar"
-      height="100"
+      height="250"
       :options="chartOptions"
       :series="series"
     ></apexchart>
-  </client-only>
+  </v-row>
 </template>
 
+<script lang="ts" setup>
+const props = defineProps({
+  progress: Number,
+  label: String,
+});
+</script>
 <script lang="ts">
 import { ref } from "vue";
 
 export default {
-  setup() {
-    const series = ref([44, 55, 67, 83]);
+  data() {
+    const series = ref([this.progress ? this.progress : 0]);
     const chartOptions = ref({
       chart: {
-        height: 100,
-        type: 'radialBar'
+        height: 250,
+        type: "radialBar",
       },
       plotOptions: {
         radialBar: {
@@ -27,7 +33,7 @@ export default {
           },
         },
       },
-      labels: ["Team A", "Team B", "Team C", "Team D"],
+      labels: [this.label],
     });
 
     return {
