@@ -1,9 +1,9 @@
 <template>
   <v-navigation-drawer>
-    <v-card color="primary">
-      <v-card-title>
-        Customer Search
-      </v-card-title>
+    <v-card variant="outlined" rounded="0">
+        <v-card-title>
+          Customer Search
+        </v-card-title>
     </v-card>
     <v-form style="padding:5px">
       <v-text-field
@@ -65,7 +65,7 @@
         label="Customer Group"
       ></v-select>
 
-      <v-btn @click="getCustomers"> Buscar </v-btn>
+      <v-btn variant="outlined" rounded="0" @click="getCustomers"> Buscar </v-btn>
     </v-form>
   </v-navigation-drawer>  
 </template>

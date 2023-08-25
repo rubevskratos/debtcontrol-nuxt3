@@ -1,10 +1,10 @@
 <template>
   <v-navigation-drawer>
-    <v-card color="primary">
+    <v-card variant="outlined" rounded="0">
       <v-card-title> Invoice Search </v-card-title>
     </v-card>
     <v-form style="padding: 5px">
-      <v-card>
+      <v-card flat>
         <v-card-text>
           Ordenar
           <v-radio-group>
@@ -41,6 +41,7 @@
             density="compact"
             name="dateMin"
             label="Fecha Minima"
+            clearable
             id="dateMin"
             v-model="minDate"
             type="date"
@@ -48,6 +49,7 @@
           <v-text-field
             name="dateMax"
             label="Fecha Máxima"
+            clearable
             id="dateMax"
             v-model="maxDate"
             type="date"
@@ -76,7 +78,7 @@
         </v-card-text>
       </v-card>
       <v-divider class="mt-2 mb-2"></v-divider>
-      <v-btn @click="getInvoices"> Buscar </v-btn>
+      <v-btn variant="outlined" rounded="0" @click="getInvoices"> Buscar </v-btn>
     </v-form>
   </v-navigation-drawer>
 </template>

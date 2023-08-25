@@ -1,8 +1,8 @@
 <template>
   <v-dialog v-model="dialog" width="80%">
     <template v-slot:activator="{ props }">
-      <v-btn color="primary" v-bind="props"
-        ><v-icon>mdi-pencil-outline</v-icon> VER DETALLES
+      <v-btn color="teal" v-bind="props"
+        ><v-icon>mdi-list-box-outline</v-icon>Detalles
       </v-btn>
     </template>
 

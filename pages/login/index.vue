@@ -20,6 +20,8 @@
                   outlined
                   label="User Name"
                   v-model="login.Email"
+                  autocomplete
+                  type="email"
                   required
                 ></v-text-field>
                 <v-text-field
@@ -36,7 +38,7 @@
             </v-card-text>
             <v-card-actions>
               <v-spacer></v-spacer>
-              <v-btn variant="tonal" color="primary" elevation="5" @click.prevent="userLogin">Login</v-btn>
+              <v-btn variant="outlined" color="primary" elevation="5" @click.prevent="userLogin">Login</v-btn>
             </v-card-actions>
           </v-card>
         </v-col>
